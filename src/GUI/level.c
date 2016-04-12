@@ -32,7 +32,7 @@ void drawLevelForOnePlayer(const Level* level){
     glViewport(0,0,window.width,window.height);
     drawView(&(level->map), level->players);
     int i =0;
-    for(i;i<2;i++){
+    for(;i<2;i++){
         glColor3f(0.1,0.6,0);
         glBegin(GL_LINES);
         glVertex2f(i*2,-100);
@@ -87,48 +87,52 @@ void drawLevelForFourPlayer(const Level* level){
     drawView(&(level->map), level->players+3);
 }
 void drawLevel(const Level* level){
-  switch(level->nbPlayers){
-  case 1:
-      drawLevelForOnePlayer(level);
-      break;
-  case 2:
-      drawLevelForTwoPlayer(level);
-      break;
-  case 3:
-      drawLevelForThreePlayer(level);
-      break;
-  case 4:
-      drawLevelForFourPlayer(level);
-      break;
-  }
+    switch(level->nbPlayers){
+    case 1:
+        drawLevelForOnePlayer(level);
+        break;
+    case 2:
+        drawLevelForTwoPlayer(level);
+        break;
+    case 3:
+        drawLevelForThreePlayer(level);
+        break;
+    case 4:
+        drawLevelForFourPlayer(level);
+        break;
+    }
 }
 
 void updateLevel(Level* level){
-  updateMap(&(level->map));
-  int i =0;
-  for(;i<level->nbPlayers;i++){
-    updateHovercraft(level->players+i);
-    Chained_Object* co = level->map.objects;
-    for(;co!=NULL;co=co->next){
-        handleCollision(&(level->players[i].physical_body),co->object);
-        Modification* current = co->object->receivedModifs;
-        if(current!=NULL){
-            while(current->next!=NULL){
-                if(applyEffectToObject(current,co->object)){
-                    Modification* nextNext = current->next->next;
-                    free(current->next);
-                    current->next = nextNext;
+    updateMap(&(level->map));
+    int i =0;
+    for(;i<level->nbPlayers;i++){
+        updateHovercraft(level->players+i);
+        Chained_Object* co = level->map.objects;
+        for(;co!=NULL;co=co->next){
+            level->players[i].physical_body.x += level->players[i].vx;
+            level->players[i].physical_body.y += level->players[i].vy;
+            handleCollision(&(level->players[i].physical_body),co->object);
+            level->players[i].physical_body.x -= level->players[i].vx;
+            level->players[i].physical_body.y -= level->players[i].vy;
+            Modification* current = co->object->receivedModifs;
+            if(current!=NULL){
+                while(current->next!=NULL){
+                    if(applyEffectToObject(current,co->object)){
+                        Modification* nextNext = current->next->next;
+                        free(current->next);
+                        current->next = nextNext;
+                    }
+                    else
+                        current = current->next;
                 }
-                else
-                    current = current->next;
-            }
-            while(applyEffectToObject(co->object->receivedModifs,co->object)){
-                co->object->receivedModifs = co->object->receivedModifs->next;
-                if(co->object->receivedModifs==NULL)
-                    break;
+                while(applyEffectToObject(co->object->receivedModifs,co->object)){
+                    co->object->receivedModifs = co->object->receivedModifs->next;
+                    if(co->object->receivedModifs==NULL)
+                        break;
+                }
             }
         }
     }
-  }
 
 }

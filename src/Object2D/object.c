@@ -152,19 +152,19 @@ int makeIntersection_C_S(Point2D C, float radius, Point2D A, Point2D B,
                     C.y*A.y;
 
     float a = scalAB;
-    float b = scalABCA * 2;
-    float c = scalOA + scalOC - 2*(scalOCOA) - radius*radius;
-    float delta = b*b - 4*a*c;
-    if(delta>0){
-        float t1 = (-b + sqrt(delta))/(2.*a);
-        float t2 = (-b - sqrt(delta))/(2.*a);
+    float b = scalABCA * 2.;
+    float c = scalOA + scalOC - 2.*(scalOCOA) - radius*radius;
+    float delta = b*b - 4.*a*c;
+    if(delta>0.){
+        float t1 = (-b + sqrtf(delta))/(2.*a);
+        float t2 = (-b - sqrtf(delta))/(2.*a);
         if(t1>t2)
         {
             float temp = t1;
             t1 = t2;
             t2 = temp;
         }
-        if((t1 <= 0 && t2 >1) || (t2>=0 && t2 <=1) || (t1 >=0 && t1<=0))
+        if((t1 <= 0. && t2 >=1.) || (t2>=0. && t2 <=1.) || (t1 >=0. && t1<=1.))
         {
             intersect->normal1 = makeVector(AB.y,-AB.x);
             normalizeVector(&(intersect->normal1));
@@ -224,7 +224,6 @@ int collision_P_P(const Shape *shape1, Point2D p1, float angle1,
                   Intersection* intersect){
     int i, j, isIn;
     Point2D A1,B1,A2,B2;
-    Point2D v;
     for (i=0; i<shape1->spec.polygon.nbPoints-1; i++)
     {
         A1 = makeTranslateAndRotate(shape1->spec.polygon.points[i],p1.x,p1.y,angle1);

@@ -4,6 +4,7 @@
 #include "image_src.h"
 #include <stdlib.h>
 #include "Object2D/hovercraft.h"
+#include "GUI/menu.h"
 
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
