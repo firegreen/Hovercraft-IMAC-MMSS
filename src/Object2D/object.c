@@ -186,19 +186,19 @@ int makeIntersection_C_S(Point2D C, float radius, Point2D A, Point2D B,
 }
 
 
-int collision_C_P(const Shape* shape1, Point2D p1, const Shape* shape2, Point2D p2, float angle,
+int collision_C_P(const Shape* shape1, Point2D p1, float angle1, const Shape* shape2, Point2D p2, float angle2,
                   Intersection* intersect){
     int i = 0;
-    Point2D C = makePoint(shape1->spec.circle.center.x + p1.x,shape1->spec.circle.center.y + p1.y);
+    Point2D C = makeTranslateAndRotate(shape1->spec.circle.center,p1.x,p1.y,angle1);
     for(;i<shape2->spec.polygon.nbPoints-1;i++)
     {
-        Point2D A = makeTranslateAndRotate(shape2->spec.polygon.points[i],p2.x,p2.y,angle);
-        Point2D B = makeTranslateAndRotate(shape2->spec.polygon.points[i+1],p2.x,p2.y,angle);
+        Point2D A = makeTranslateAndRotate(shape2->spec.polygon.points[i],p2.x,p2.y,angle2);
+        Point2D B = makeTranslateAndRotate(shape2->spec.polygon.points[i+1],p2.x,p2.y,angle2);
         if(makeIntersection_C_S(C,shape1->spec.circle.radius,A,B,intersect))
             return 1;
     }
-    Point2D A = makeTranslateAndRotate(shape2->spec.polygon.points[shape2->spec.polygon.nbPoints-1],p2.x,p2.y,angle);
-    Point2D B = makeTranslateAndRotate(shape2->spec.polygon.points[0],p2.x,p2.y,angle);
+    Point2D A = makeTranslateAndRotate(shape2->spec.polygon.points[shape2->spec.polygon.nbPoints-1],p2.x,p2.y,angle2);
+    Point2D B = makeTranslateAndRotate(shape2->spec.polygon.points[0],p2.x,p2.y,angle2);
     return makeIntersection_C_S(C,shape1->spec.circle.radius,A,B,intersect);
 }
 
@@ -271,7 +271,7 @@ int collisionBetweenShapes(const Shape *shape1, Point2D p1, float angle1,
         case CIRCLE:
             return collision_C_C(shape1,p1,angle1,shape2,p2,angle2,intersect);
         case POLYGON:
-            return collision_C_P(shape1,p1,shape2,p2,angle2,intersect);
+            return collision_C_P(shape1,p1,angle1,shape2,p2,angle2,intersect);
         default:
             break;
         }
@@ -279,7 +279,7 @@ int collisionBetweenShapes(const Shape *shape1, Point2D p1, float angle1,
     case POLYGON:
         switch (shape2->type) {
         case CIRCLE:
-            return collision_C_P(shape2,p2,shape1,p1,angle1,intersect);
+            return collision_C_P(shape2,p2,angle2,shape1,p1,angle1,intersect);
         case POLYGON:
             return collision_P_P(shape1,p1,angle1,shape2,p2,angle2,intersect);
         default:
