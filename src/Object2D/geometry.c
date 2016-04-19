@@ -71,6 +71,7 @@ Segment makeLine(Point2D start, Point2D end){
     s.start = start;
     s.end = end;
     s.direction = makeVectorAB(start,end);
-    normalizeVector(s.direction);
+    //normalizeVector(&(s.direction));
     s.angle = atanf(s.direction.y/s.direction.x);
+    return s;
 }

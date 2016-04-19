@@ -17,7 +17,7 @@ void resize_handler(float width, float height)
     window.width = width;
     window.height = height;
     window.orthoGLX = GLREPERE;
-    window.orthoGLY = GLREPERE;
+    window.orthoGLY = GLREPERE * height/width;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-window.orthoGLX, window.orthoGLX, -window.orthoGLY, window.orthoGLY);
