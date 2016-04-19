@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include "GUI/control.h"
+#include "SDL_tools.h"
 
-
-void initialiserJoystick(Joystick *input,int numeroJoystick)
+void initJoystick(Joystick *input,int numeroJoystick)
 
 {
 
@@ -42,6 +42,14 @@ void initialiserJoystick(Joystick *input,int numeroJoystick)
         input->trackballs = NULL;
     }
 
+}
+
+void initMouse(Mouse *input){
+    input->currentPos = makePoint(0,0);
+    input->deltaPos = makePoint(0,0);
+    int i;
+    for(i=0;i<NBBUTTONS;i++) input->isPressed[i] =0;
+    input->originPressedPos = makePoint(0,0);
 }
 
 void detruireJoystick(Joystick *input)
@@ -95,4 +103,60 @@ int handleJoystickEvent(Joystick *inputs, const SDL_Event* event)
         break;
     }
     return 0;
+}
+
+int handleMouseEvent(Mouse *input, const SDL_Event *event){
+    switch(event->type)
+    {
+    case SDL_MOUSEMOTION:
+        input->deltaPos = makeVectorAB(makePoint(event->motion.x,event->motion.y),input->currentPos);
+        input->currentPos = makePoint(event->motion.x,event->motion.y);
+        break;
+    case SDL_MOUSEBUTTONUP:
+        switch (event->button.which) {
+        case SDL_BUTTON_LEFT:
+            input->isPressed[LEFTBUTTON] = 0;
+            break;
+        case SDL_BUTTON_RIGHT:
+            input->isPressed[RIGHTBUTTON] = 0;
+            break;
+        case SDL_BUTTON_WHEELDOWN:
+            input->isPressed[WHEELDOWN] = 0;
+            break;
+        case SDL_BUTTON_WHEELUP:
+            input->isPressed[WHEELUP] = 0;
+            break;
+        default:
+            break;
+        }
+        break;
+    case SDL_MOUSEBUTTONDOWN:
+        switch (event->button.which) {
+        case SDL_BUTTON_LEFT:
+            input->isPressed[LEFTBUTTON] = 1;
+            break;
+        case SDL_BUTTON_RIGHT:
+            input->isPressed[RIGHTBUTTON] = 1;
+            break;
+        case SDL_BUTTON_WHEELDOWN:
+            input->isPressed[WHEELDOWN] = 1;
+            break;
+        case SDL_BUTTON_WHEELUP:
+            input->isPressed[WHEELUP] = 1;
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
+Point2D convertWindowPointToGLPoint(Point2D p){
+    Point2D retour;
+    retour.x = p.x * window.orthoGLX*2 / window.width -window.orthoGLX;
+    retour.y = p.y * window.orthoGLY*-2 / window.height +window.orthoGLY;
+    return retour;
 }

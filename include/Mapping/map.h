@@ -10,18 +10,24 @@
 #endif
 
 #include "Object2D/geometry.h"
+#include "Object2D/object.h"
 #include "quadTree.h"
-struct Object;
 
 typedef struct Map {
   float width, height;
   Bounds4P bounds;
   struct Chained_Object* objects;
   QuadTree tree;
+  Object physicalBounds;
+  Color3f color;
+  float Bcolorevolution;
+  float Gcolorevolution;
+  float frottement;
 } Map;
 
-void initMap(Map *map, float width, float height);
-void addObjectToMap(Map *map, struct Object* o, Point2D position);
+void initMap(Map *map, float width, float height, float frottement);
+void addObjectToMap(Map *map, Object* o, Point2D position);
 void updateMap(Map *map);
+void applyFrottement(const Map* map, Object* o);
 void drawMap(const Map* map);
 #endif

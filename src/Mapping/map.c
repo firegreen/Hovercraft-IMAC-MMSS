@@ -21,7 +21,7 @@ void drawMap(const Map* map){
 
         glBegin(GL_QUADS);
 
-        glColor3f(1, 1, 1);
+        glColor3f(map->color.r, map->color.g, map->color.b);
 
         glTexCoord2f(0, 0);
         glVertex2f(map->bounds.leftTop.x, map->bounds.leftTop.y);
@@ -42,7 +42,7 @@ void drawMap(const Map* map){
     else{
         glBegin(GL_QUADS);
 
-        glColor3f(0.15, 0.3, 0.65);
+        glColor3f(map->color.r,map->color.g,map->color.b);
 
         glVertex2f(map->bounds.leftTop.x, map->bounds.leftTop.y);
         glVertex2f(map->bounds.leftBottom.x, map->bounds.leftBottom.y);
@@ -62,14 +62,30 @@ void drawMap(const Map* map){
 }
 
 void updateMap(Map *map){
-
+    if(map->color.b<=0.8 || map->color.b>1.0){
+        map->Bcolorevolution*=-1;
+    }
+    if(map->color.g<=0.9 || map->color.g>1.0){
+        map->Gcolorevolution*=-1;
+    }
+    map->color.g += map->color.g*map->Gcolorevolution;
+    map->color.b += map->color.b*map->Bcolorevolution;
 }
 
-void initMap(Map* map, float width, float height){
+void applyFrottement(const Map *map, Object *o){
+    o->vx -= o->vx * map->frottement;
+    o->vy -= o->vy * map->frottement;
+}
+
+void initMap(Map* map, float width, float height, float frottement){
     map->bounds = makeBounds4P(-width/2.,height/2.,width/2.,-height/2.);
     map->height = height;
     map->width = width;
     map->objects = NULL;
+    map->frottement = frottement;
+    map->color = makeColor3f(1,1,1);
+    map->Bcolorevolution = -0.003;
+    map->Gcolorevolution = -0.0002;
     if(!SEATEXTUREID){
         SDL_Surface* image = IMG_Load(SEAFILE);
         if(image == NULL) {
@@ -107,13 +123,15 @@ void initMap(Map* map, float width, float height){
         }
 
     }
-    Object* o = makeObject(1,1,100,2000);
-    makeInversedRectangle(o->shapes,-100,100,200,200);
+    makeObject(&(map->physicalBounds),1,1,100,2000,1,0,1);
+    makeInversedRectangle(map->physicalBounds.shapes,-width/2.,height/2.,width,height);
+    map->physicalBounds.shapes->color=makeColor3f(25,60,98);
     Effect e;
-    e.acceleration.acceleration_value = 0.1;
-    o->effectsAtCollision[0]=e;
-    o->effectsTypesAtCollision[0]=ACCELERATION;
-    map->objects = makeChainedObject(o,NULL,makePoint(0,0));
+    e.rebound.resistance = 100;
+    e.rebound.rebound_value = 0.5;
+    map->physicalBounds.effectsAtCollision[0]=e;
+    map->physicalBounds.effectsTypesAtCollision[0]=REBOUND;
+    map->objects = makeChainedObject(&(map->physicalBounds),NULL,makePoint(0,0));
 }
 
 void addObjectToMap(Map *map, struct Object *o, Point2D position){

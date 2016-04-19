@@ -9,13 +9,19 @@
 #include "GUI/control.h"
 #include "Mapping/camera.h"
 #include "SDL_tools.h"
+#include "GUI/menu.h"
 
 Level levels[NBLEVELS];
 typedef enum { MAINAUDIO1=0,MAINAUDIO2,MAINAUDIO3,ACCAUDIO,COLISIONAUDIO } AudioID;
 
+typedef union ModeStruct {
+    Level level;
+    //Menu menu;
+} ModeStruct;
+
 struct {
   Mode currentMode;
-  Level* currentLevel;
+  ModeStruct* currentModeStruct;
   int windowWidth, windowHeight;
   unsigned char fullscreen;
   unsigned char levelIsUnLocked[NBLEVELS];

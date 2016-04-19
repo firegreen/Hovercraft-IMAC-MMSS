@@ -31,29 +31,6 @@ void drawView(const Map* map, const Hovercraft* hovercraft){
 void drawLevelForOnePlayer(const Level* level){
     glViewport(0,0,window.width,window.height);
     drawView(&(level->map), level->players);
-    int i =0;
-    for(;i<2;i++){
-        glColor3f(0.1,0.6,0);
-        glBegin(GL_LINES);
-        glVertex2f(i*2,-100);
-        glVertex2f(i*2,100);
-        glEnd();
-        glColor3f(0.6,0.1,0);
-        glBegin(GL_LINES);
-        glVertex2f(-100,i*2);
-        glVertex2f(100,i*2);
-        glEnd();
-        glColor3f(0.1,0.6,0);
-        glBegin(GL_LINES);
-        glVertex2f(-i*2,-100);
-        glVertex2f(-i*2,100);
-        glEnd();
-        glColor3f(0.6,0.1,0);
-        glBegin(GL_LINES);
-        glVertex2f(-100,-i*2);
-        glVertex2f(100,-i*2);
-        glEnd();
-    }
 }
 
 void drawLevelForTwoPlayer(const Level* level){
@@ -106,33 +83,124 @@ void drawLevel(const Level* level){
 void updateLevel(Level* level){
     updateMap(&(level->map));
     int i =0;
+    Chained_Object* co;
+    Chained_Object* coNext;
     for(;i<level->nbPlayers;i++){
+        applyFrottement(&(level->map), &(level->players[i].physical_body));
         updateHovercraft(level->players+i);
-        Chained_Object* co = level->map.objects;
-        for(;co!=NULL;co=co->next){
-            level->players[i].physical_body.x += level->players[i].vx;
-            level->players[i].physical_body.y += level->players[i].vy;
-            handleCollision(&(level->players[i].physical_body),co->object);
-            level->players[i].physical_body.x -= level->players[i].vx;
-            level->players[i].physical_body.y -= level->players[i].vy;
-            Modification* current = co->object->receivedModifs;
-            if(current!=NULL){
-                while(current->next!=NULL){
-                    if(applyEffectToObject(current,co->object)){
-                        Modification* nextNext = current->next->next;
-                        free(current->next);
-                        current->next = nextNext;
-                    }
-                    else
-                        current = current->next;
+        if(level->map.objects!=NULL){
+            co = level->map.objects;
+            while(co->next!=NULL){
+                handleCollision(&(level->players[i].physical_body),co->next->object);
+                if(co->next->object->life > 0){
+                    updateObject(co->next->object);
+                    applyFrottement(&(level->map), co->next->object);
+                    co=co->next;
                 }
-                while(applyEffectToObject(co->object->receivedModifs,co->object)){
-                    co->object->receivedModifs = co->object->receivedModifs->next;
-                    if(co->object->receivedModifs==NULL)
-                        break;
+                else{
+                    coNext = co->next->next;
+                    free(co->next);
+                    co->next = coNext;
                 }
+            }
+            handleCollision(&(level->players[i].physical_body),level->map.objects->object);
+            if(level->map.objects->object->life > 0){
+                updateObject(level->map.objects->object);
+                applyFrottement(&(level->map), level->map.objects->object);
+            }
+            else{
+                coNext = level->map.objects->next;
+                free(level->map.objects);
+                level->map.objects = coNext;
             }
         }
     }
 
+}
+
+void handleEventLevel(Level *l, const SDL_Event *event){
+    switch(event->type)
+    {
+    case SDL_KEYDOWN:
+        if( event->button.button == SDL_BUTTON_WHEELDOWN)
+        {
+            l->players[0].view.leftTop.x-=10;
+            l->players[0].view.rightBottom.x+=10;
+            l->players[0].view.leftTop.y+=10;
+            l->players[0].view.rightBottom.y-=10;
+        }
+        else if(event->button.button == SDL_BUTTON_WHEELUP){
+            l->players[0].view.leftTop.x+=10;
+            l->players[0].view.rightBottom.x-=10;
+            l->players[0].view.leftTop.y-=10;
+            l->players[0].view.rightBottom.y+=10;
+        }
+        switch(event->key.keysym.sym ){
+        case SDLK_UP:
+            l->players[0].linearAccelerate = 1;
+            //playAudioFadeIn(Game.audioIDs[ACCAUDIO],0.8);
+            break;
+        case SDLK_DOWN:
+            l->players[0].linearAccelerate = -1./2.;
+            break;
+        case SDLK_LEFT:
+            l->players[0].rotationAccelerate =1;
+            break;
+        case SDLK_RIGHT:
+            l->players[0].rotationAccelerate =-1;
+            break;
+        case SDLK_p:
+            if(event->key.keysym.mod == KMOD_LCTRL || event->key.keysym.mod == KMOD_RCTRL)
+            {
+                if(l->players[0].view.rightBottom.x-
+                        l->players[0].view.leftTop.x > 40){
+                    l->players[0].view.leftTop.x+=10;
+                    l->players[0].view.rightBottom.x-=10;
+                    l->players[0].view.leftTop.y-=10;
+                    l->players[0].view.rightBottom.y+=10;
+                    updateView(l->players);
+                }
+            }
+            break;
+        case SDLK_m:
+            if(event->key.keysym.mod == KMOD_LCTRL || event->key.keysym.mod == KMOD_RCTRL)
+            {
+                if(l->players[0].view.rightBottom.x-
+                        l->players[0].view.leftTop.x < l->map.width-20){
+                    l->players[0].view.leftTop.x-=10;
+                    l->players[0].view.rightBottom.x+=10;
+                    l->players[0].view.leftTop.y+=10;
+                    l->players[0].view.rightBottom.y-=10;
+                    updateView(l->players);
+                }
+            }
+            break;
+        default:
+            break;
+        }
+        break;
+    case SDL_KEYUP:
+        switch( event->key.keysym.sym ){
+        case SDLK_UP:
+            //stopAudioFadeOut(Game.audioIDs[ACCAUDIO],1.2);
+            l->players[0].linearAccelerate = 0;
+            break;
+        case SDLK_DOWN:
+            l->players[0].linearAccelerate = 0;
+            break;
+        case SDLK_LEFT:
+            l->players[0].physical_body.vAngle = 0;
+            l->players[0].rotationAccelerate = 0;
+            break;
+        case SDLK_RIGHT:
+            l->players[0].physical_body.vAngle = 0;
+            l->players[0].rotationAccelerate = 0;
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
 }

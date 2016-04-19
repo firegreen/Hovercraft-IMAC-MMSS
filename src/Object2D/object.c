@@ -169,7 +169,6 @@ int makeIntersection_C_S(Point2D C, float radius, Point2D A, Point2D B,
             intersect->normal1 = makeVector(AB.y,-AB.x);
             normalizeVector(&(intersect->normal1));
             intersect->normal2 = makeVector(-intersect->normal1.x,-intersect->normal1.y);
-            printf("Intersection normal (%f,%f)\n",intersect->normal1.x,intersect->normal1.y);
             return 1;
         }
     }
@@ -296,8 +295,10 @@ int collisionBetweenObject(const Object *o1, const Object *o2, Intersection *int
     int i,j;
     intersect->normal1 = makeVector(0,0);
     intersect->normal2 = makeVector(0,0);
-    for(i=0;i<o1->nbShapes;i++){
-        for(j=0;j<o2->nbShapes;j++){
+    for(i=0;i<o1->nbShapes;i++)
+    {
+        for(j=0;j<o2->nbShapes;j++)
+        {
             if(collisionBetweenShapes(o1->shapes+i,makePoint(o1->x,o1->y), o1->angle,
                                       o2->shapes+j,makePoint(o2->x,o2->y), o2->angle,
                                       intersect))
@@ -309,91 +310,172 @@ int collisionBetweenObject(const Object *o1, const Object *o2, Intersection *int
     return 0;
 }
 
-Object *makeObject(int nbEffect, int nbShape, float life, float colliderRadius){
-    Object* o = malloc(sizeof(Object));
+void makeObject(Object* o, int nbEffect, int nbShape,
+                float life, float colliderRadius, unsigned char isStatic,
+                float strenth, unsigned char isUnbreakable){
     o->angle=90;
-    o->x=o->y=0;
     o->colliderRadius=colliderRadius;
     o->nbEffect=nbEffect;
     o->nbShapes=nbShape;
+    o->isStatic=isStatic;
+    o->isUnbreakable = isUnbreakable;
     o->effectDelays = malloc(sizeof(int)*nbEffect);
     o->effectsAtCollision = malloc(sizeof(Effect)*nbEffect);
     o->effectsTypesAtCollision = malloc(sizeof(EFFECT_TYPE)*nbEffect);
     o->life=life;
+    o->strenth=strenth;
     o->receivedModifs=NULL;
     o->shapes=malloc(sizeof(Shape)*nbShape);
-    return o;
+
+    o->ax = o->ay = o->aAngle = o->vAngle = o->vy = o->vx = o->x=o->y=0;
 }
 
 
-Modification* makeModifications(EFFECT_TYPE type, Effect effect, int delay, Intersection intersect){
+void setModifications(EFFECT_TYPE type, Effect effect, int delay, Intersection intersect,
+                                Object* o){
     Modification* modif = malloc(sizeof(Modification));
     modif->effectType = type;
     modif->effect = effect;
     modif->initialDelay = modif->delay = delay;
     modif->intersection = intersect;
     modif->next = NULL;
-    return modif;
+
+    modif->next = o->receivedModifs;
+    o->receivedModifs = modif;
 }
 
-void handleCollision(Object *o1, Object *o2){
+int handleCollision(Object *o1, Object *o2){
     Intersection inter;
+    o1->x += o1->vx/2;
+    o1->y += o1->vy/2;
+    o2->x += o2->vx/2;
+    o2->y += o2->vy/2;
     if(collisionBetweenObject(o1,o2,&inter)){
-        Modification *newM;
-        int i,j;
-        for(i=0;i<o1->nbEffect;i++){
-            newM = makeModifications(o1->effectsTypesAtCollision[i],o1->effectsAtCollision[i],5,inter);
-            newM->next = o2->receivedModifs;
-            o2->receivedModifs = newM;
-            for(j=0;j<o2->nbShapes;j++)
-                o2->shapes[i].color.r += 0.5;
+        int i;
+        if(!o1->isUnbreakable)
+            o1->life -= o2->strenth;
+        if(!o2->isUnbreakable)
+            o2->life -= o1->strenth;
+        o1->x += o1->vx/2;
+        o1->y += o1->vy/2;
+        o2->x += o2->vx/2;
+        o2->y += o2->vy/2;
+        if(o2->life>0){
+            for(i=0;i<o1->nbEffect;i++){
+                setModifications(o1->effectsTypesAtCollision[i],o1->effectsAtCollision[i],5,inter,o2);
+            }
         }
-        for(i=0;i<o2->nbEffect;i++){
-            newM = makeModifications(o2->effectsTypesAtCollision[i],o2->effectsAtCollision[i],5,inter);
-            newM->next = o1->receivedModifs;
-            o1->receivedModifs = newM;
-            for(j=0;j<o1->nbShapes;j++)
-                o1->shapes[j].color.r += 0.5;
+        if(o1->life>0){
+            for(i=0;i<o2->nbEffect;i++){
+                setModifications(o2->effectsTypesAtCollision[i],o2->effectsAtCollision[i],5,inter,o1);
+            }
         }
+        return 1;
     }
+    o1->x -= o1->vx/2;
+    o1->y -= o1->vy/2;
+    o2->x -= o2->vx/2;
+    o2->y -= o2->vy/2;
+    return 0;
 }
 
 int applyEffectToObject(Modification *modif, Object *o){
-    int i;
-    for(i=0;i<o->nbShapes;i++)
-        o->shapes[i].color.r -= (0.5f/(float)modif->initialDelay);
+    float valueX,valueY;
+    /*for(i=0;i<o->nbShapes;i++)
+        o->shapes[i].color.r -= (0.5f/(float)modif->initialDelay);*/
     switch (modif->effectType) {
-    case MAX_SPEED:
-
+    case ACCELERATION:
+        if(!o->isStatic){
+            valueX = modif->intersection.normal1.x * modif->effect.acceleration.acceleration_value;
+            valueY = modif->intersection.normal1.y * modif->effect.acceleration.acceleration_value;
+            o->vx += valueX;
+            o->vy += valueY;
+        }
+        else
+            return 1;
         break;
+    case REBOUND:
+        if(!o->isStatic){
+            float resistanceX = fabs(modif->effect.rebound.resistance * modif->intersection.normal1.x);
+            float resistanceY = fabs(modif->effect.rebound.resistance * modif->intersection.normal1.y);
+            if(resistanceX < fabs(o->vx)){
+                o->vx += resistanceX;
+            }
+            else{
+                valueX = modif->intersection.normal1.x *
+                         modif->effect.rebound.rebound_value *
+                         fabs(o->vx);
+                o->ax = valueX;
+                o->vx = o->ax;
+                o->x += o->vx;
+            }
+            if(resistanceY < fabs(o->vy)){
+                o->vy += resistanceY;
+            }
+            else{
+                valueY = modif->intersection.normal1.y *
+                         modif->effect.rebound.rebound_value *
+                         fabs(o->vy);
+                o->ay = valueY;
+                o->vy = o->ay;
+                o->y += o->vy;
+            }
+        }
+        return 1;
     default:
-        break;
+        return 0;
     }
     modif->delay--;
     if(modif->delay<=0) return 1;
     return 0;
 }
 
-int applyEffectToHovercraft(Modification *modif, struct Hovercraft *h){
-    float valueX,valueY;
-    int i;
-    for(i=0;i<h->physical_body.nbShapes;i++)
-        h->physical_body.shapes[i].color.r -= (0.5f/(float)modif->initialDelay);
+int applyEffectToHovercraft(Modification *modif, Hovercraft *h){
     switch (modif->effectType) {
-    case MAX_SPEED:
-        break;
-    case ACCELERATION:
-        //printf("force Normal (%f,%f)\n",modif->intersection.normal1.x,modif->effect.acceleration.acceleration_value);
-        valueX = modif->intersection.normal1.x * modif->effect.acceleration.acceleration_value;
-        valueY = modif->intersection.normal1.y * modif->effect.acceleration.acceleration_value;
-        h->vx += valueX;
-        h->vy += valueY;
-
-        break;
+    case POINTSPLUS:
+        h->points += modif->effect.points.ammount;
+        return 1;
+    case POINTMINUS:
+        h->points -= modif->effect.points.ammount;
+        return 1;
     default:
-        break;
+        return 0;
     }
     modif->delay--;
     if(modif->delay<=0) return 1;
     return 0;
+}
+void updateObject(Object *object){
+    if(object->receivedModifs!=NULL){
+        Modification* current = object->receivedModifs;
+        Modification* nextNext;
+
+        while(current->next!=NULL){
+            if(applyEffectToObject(current->next,object)){
+                nextNext = current->next->next;
+                free(current->next);
+                current->next = nextNext;
+            }
+            else
+                current = current->next;
+        }
+        if(applyEffectToObject(object->receivedModifs,object)){
+            current = object->receivedModifs->next;
+            free(object->receivedModifs);
+            object->receivedModifs = current;
+        }
+    }
+
+    object->angle += object->vAngle;
+
+    if(isZero(object->vx))
+        object->vx=0;
+    if(isZero(object->vy))
+        object->vy=0;
+
+    object->vx += object->ax;
+    object->vy += object->ay;
+
+    object->x += object->vx;
+    object->y += object->vy;
 }

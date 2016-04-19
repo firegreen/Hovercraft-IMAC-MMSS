@@ -7,8 +7,6 @@
 #include <GL/glu.h>
 #endif
 
-
-
 #include "SDL_tools.h"
 
 Audio* audios = NULL;
@@ -19,7 +17,7 @@ void resize_handler(float width, float height)
     window.width = width;
     window.height = height;
     window.orthoGLX = GLREPERE;
-    window.orthoGLY = GLREPERE * height/width;
+    window.orthoGLY = GLREPERE;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-window.orthoGLX, window.orthoGLX, -window.orthoGLY, window.orthoGLY);
@@ -70,7 +68,6 @@ void mixaudio(void * userData, Uint8 * stream, int len)
                 Sint16 sample =   a->soundpos < a->soundlength ?
                             (*((Sint16 *)(a->sounddata + a->soundpos))) :
                             0;
-                //printf("%d %d\n",j,sample);
                 sample = sample_volume(sample,a->currentVolume);
                 sample = sample_mix(sample, mix);
                 /* Ecriture du nouveau son mixé */

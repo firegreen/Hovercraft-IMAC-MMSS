@@ -1,23 +1,25 @@
 #ifndef HOVERCRAFT_H
 #define HOVERCRAFT_H
 
-#include "object.h"
 #include "Mapping/camera.h"
+#include "Object2D/object.h"
 
 typedef struct Hovercraft{
-  Object physical_body;
+  struct Object physical_body;
 
-  float max_speed;
-  float vx,vy;
-  float ax,ay;
+  float max_linear_speed;
   float moteur;
 
+  float max_rotation_speed;
+
   unsigned int points;
-  float rotationSpeed;
-  float rotationAcceleration;
-  float linearBoost;
-  int rotationBoost;
+  float linearAccelerate;
+  float rotationAccelerate;
   Camera view;
+
+  /* computer part */
+  unsigned char automatic;
+
 } Hovercraft;
 
 void initHovercraft(Hovercraft* hovercraft);

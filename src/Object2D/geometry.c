@@ -65,3 +65,12 @@ Vector2D makeVectorAB(Point2D A, Point2D B){
     AB.y=B.y - A.y;
     return AB;
 }
+
+Segment makeLine(Point2D start, Point2D end){
+    Segment s;
+    s.start = start;
+    s.end = end;
+    s.direction = makeVectorAB(start,end);
+    normalizeVector(s.direction);
+    s.angle = atanf(s.direction.y/s.direction.x);
+}

@@ -10,6 +10,8 @@ include/Object2D/object.h
 include/game.h
 include/image_src.h
 include/SDL_tools.h
+include/GUI/menu.h
+include/GUI/control.h
 src/GUI/level.c
 src/GUI/mode.c
 src/Mapping/camera.c
@@ -23,8 +25,6 @@ src/game.c
 src/image_src.c
 src/main.c
 src/SDL_tools.c
-include/GUI/menu.h
 src/GUI/menu.c
-Makefile
-include/GUI/control.h
 src/GUI/control.c
+Makefile

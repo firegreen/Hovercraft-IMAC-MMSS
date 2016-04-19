@@ -13,7 +13,7 @@
 
 #define BITS_PER_PIXEL 32
 #define MILLISECOND_PER_FRAME 1000 / 60
-#define GLREPERE 100
+#define GLREPERE 100.
 #define NBAUDIOMAX 10
 #define GL_BRG 0x80E
 #define GL_BRGA 0x801

@@ -12,10 +12,7 @@ typedef struct Point2D {
   float y;
 } Point2D;
 
-typedef struct Vector2D {
-  float x;
-  float y;
-} Vector2D;
+typedef Point2D Vector2D;
 
 typedef struct Bounds4F{
   float x,y;
@@ -40,6 +37,13 @@ typedef struct Intersection{
     Vector2D normal2;
 } Intersection;
 
+typedef struct Segment{
+    Point2D start;
+    Point2D end;
+    Vector2D direction;
+    float angle;
+}Segment;
+
 Point2D makePoint(float x1, float y1);
 Vector2D makeVector(float x1, float y1);
 Vector2D normalizedVector(Vector2D v);
@@ -47,5 +51,6 @@ void normalizeVector(Vector2D* v);
 Vector2D makeVectorAB(Point2D A, Point2D B);
 Point2D makeTranslateAndRotate(Point2D p, float tx, float ty, float angle);
 Bounds4P makeBounds4P(float x1, float y1, float x2, float y2);
+Segment makeSegment(Point2D start, Point2D end);
 
 #endif //GEOMETRY_H

@@ -3,14 +3,19 @@
 #else
 #include <SDL/SDL.h>
 #endif
+#include "Object2D/geometry.h"
 
-typedef struct InputTrackball
-{
+typedef enum { RIGHTBUTTON =0, LEFTBUTTON, WHEELUP, WHEELDOWN, NBBUTTONS } MouseButton;
 
-    int x; // valeur x
-    int y; // valeur y
+typedef struct Mouse{
+    unsigned char isPressed[NBBUTTONS];
+    Point2D originPressedPos;
+    Point2D currentPos;
+    Point2D deltaPos;
+} Mouse;
 
-} InputTrackball;
+
+typedef struct Point2D InputTrackball;
 
 
 typedef struct Joystick
@@ -27,8 +32,12 @@ typedef struct Joystick
 
 
 
-void initialiserJoystick(Joystick *input,int numeroJoystick);
+void initJoystick(Joystick *input,int numeroJoystick);
+void initMouse(Mouse *input);
 
 void detruireJoystick(Joystick *input);
 
 int handleJoystickEvent(Joystick *inputs, const SDL_Event* event);
+int handleMouseEvent(Mouse *input, const SDL_Event* event);
+
+Point2D convertWindowPointToGLPoint(Point2D p);
