@@ -5,9 +5,9 @@ typedef enum nbButtons {ONEPLAYERS,TWOPLAYERS,INSTRUCTIONS,CREDITS,EXIT_GAME} nb
 
 typedef struct Button {
     char* label;
-    Bounds bounds;
-    Color fore;
-    Color back;
+    Bounds4P bounds;
+    Color4f fore;
+    Color4f back;
     void (*clickHandle)(void);
     int hover;
     int press;
