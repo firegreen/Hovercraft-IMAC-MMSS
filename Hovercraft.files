@@ -25,6 +25,6 @@ src/game.c
 src/image_src.c
 src/main.c
 src/SDL_tools.c
-src/GUI/menu.c
 src/GUI/control.c
 Makefile
+src/GUI/menu.c

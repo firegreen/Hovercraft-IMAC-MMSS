@@ -16,7 +16,7 @@ typedef enum { MAINAUDIO1=0,MAINAUDIO2,MAINAUDIO3,ACCAUDIO,COLISIONAUDIO } Audio
 
 typedef union ModeStruct {
     Level level;
-    //Menu menu;
+    Menu menu;
 } ModeStruct;
 
 struct {

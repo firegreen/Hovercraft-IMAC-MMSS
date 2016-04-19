@@ -22,7 +22,7 @@
 void drawGame(){
     switch (Game.currentMode) {
     case MODE_MAINMENU :
-        drawMenu();
+        drawMenu(&Game.currentModeStruct->menu);
         break;
     case MODE_LEVEL :
         drawLevel(&(Game.currentModeStruct->level));
@@ -99,7 +99,7 @@ void initializeGame(){
     e.rebound.resistance = 40;
     e.rebound.rebound_value = 1;
     o->effectsAtCollision[0]=e;
-    o->effectsTypesAtCollision[0]=REBOUND;
+    o->effectsTypesAtCollision[0]=POINTSPLUS;
     makeCircle(o->shapes,3,makePoint(0,0));
     o->x = -10; o->y = 10;
 

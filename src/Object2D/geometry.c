@@ -29,6 +29,17 @@ Bounds4P makeBounds4P(float x1, float y1, float x2, float y2){
     return retour;
 }
 
+Bounds6F makeBounds6F(float x1, float y1, float width, float height){
+    Bounds6F retour;
+    retour.x1 = x1;
+    retour.y1 = y1;
+    retour.height = height;
+    retour.width = width;
+    retour.x2 = width+x1;
+    retour.y2 = height+y1;
+    return retour;
+}
+
 Point2D makeTranslateAndRotate(Point2D p, float tx, float ty, float angle){
     angle -= 90.;
     float cosShape2 = cosf(angle * M_PI/180.);
