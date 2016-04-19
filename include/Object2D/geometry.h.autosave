@@ -55,7 +55,8 @@ Vector2D normalizedVector(Vector2D v);
 void normalizeVector(Vector2D* v);
 Vector2D makeVectorAB(Point2D A, Point2D B);
 Point2D makeTranslateAndRotate(Point2D p, float tx, float ty, float angle);
-Bounds4P makeBounds4P(float x1, float y1, float x2, float y2);
+Bounds4P makeBounds4P(float x1, float y1, float width, float height);
+Bounds6F makeBounds6F(float x1, float y1, float width, float height);
 Segment makeLine(Point2D start, Point2D end);
 
 #endif //GEOMETRY_H
