@@ -22,7 +22,7 @@
 void drawGame(){
     switch (Game.currentMode) {
     case MODE_MAINMENU :
-        drawMenu();
+        drawMenu(&Game.currentModeStruct->menu);
         break;
     case MODE_LEVEL :
         drawLevel(&(Game.currentModeStruct->level));

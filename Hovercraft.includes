@@ -13,3 +13,4 @@ include/SDL_tools.h
 include/GUI/menu.h
 include/GUI/control.h
 include/
+src/GUI

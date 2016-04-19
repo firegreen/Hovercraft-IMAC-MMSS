@@ -1,13 +1,16 @@
 #ifndef MENU_H
 #define MENU_H
 
-typedef enum nbButtons {ONEPLAYERS,TWOPLAYERS,INSTRUCTIONS,CREDITS,EXIT_GAME} nbButtons;
+#include "Object2D/Color.h"
+#include "Object2D/geometry.h"
+typedef enum MAINMENUBTN {ONEPLAYERS,TWOPLAYERS,INSTRUCTIONS,CREDITS,EXIT_GAME,MAINMENUNBBUTTONS} MAINMENUBTN;
+
 
 typedef struct Button {
     char* label;
-    Bound bounds;
-    Color fore;
-    Color back;
+    Bounds6F bounds;
+    Color4f fore;
+    Color4f back;
     void (*clickHandle)(void);
     int hover;
     int press;
@@ -21,6 +24,8 @@ typedef struct Menu{
 } Menu;
 
 Menu* initMenu(const char* title, int nbButtons);
-void drawMenu();
+Menu* initMainMenu();
+void drawMenu(const Menu *m);
+Button makeButton(char *label, Bounds6F bounds, Color4f fore, Color4f back, void (*clickHandle)(void));
 
 #endif
