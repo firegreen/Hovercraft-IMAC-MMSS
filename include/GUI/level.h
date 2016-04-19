@@ -3,7 +3,11 @@
 
 #include "Mapping/map.h"
 #include "Object2D/hovercraft.h"
-#include "SDL/SDL.h"
+#ifdef __APPLE__
+#include <SDL.h>
+#else
+#include <SDL/SDL.h>
+#endif
 
 typedef struct Level{
   Map map;

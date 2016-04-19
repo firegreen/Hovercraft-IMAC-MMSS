@@ -77,7 +77,7 @@ void applyFrottement(const Map *map, Object *o){
     o->vy -= o->vy * map->frottement;
 }
 
-void initMap(Map* map, float width, float height, float frottement){
+void initMap(Map* map, float width, float height, float frottement, const char* file_name){
     map->bounds = makeBounds4P(-width/2.,height/2.,width/2.,-height/2.);
     map->height = height;
     map->width = width;
@@ -87,7 +87,7 @@ void initMap(Map* map, float width, float height, float frottement){
     map->Bcolorevolution = -0.003;
     map->Gcolorevolution = -0.0002;
     if(!SEATEXTUREID){
-        SDL_Surface* image = IMG_Load(SEAFILE);
+        SDL_Surface* image = IMG_Load(file_name);
         if(image == NULL) {
             fprintf(stderr, "Impossible de charger l'image %s\n", SEAFILE);
         }
@@ -145,4 +145,57 @@ void addObjectToMap(Map *map, struct Object *o, Point2D position){
         current = current->next;
     }
     current->next = makeChainedObject(o,NULL,position);
+}
+
+void read_fichier(char* path, Map* map)
+{
+  int i;
+  char* texture;
+  char type;
+  float frottement, width, height;
+  float nbre_obstacles, nbre_formes;
+  Object objet;
+  FILE* fp;
+  if(path != NULL)
+  {
+    fp = fopen (path, "r+");      /* Ouverture du fichier path en lecture + écriture */
+  }
+  else
+  {
+    fp = stdin;
+  }
+  while (fgetc(fp) != " ")
+  {
+    fscanf(fp, "Texture de la carte : %s\n", &texture);
+    fscanf(fp, "Frottement de la carte : %f\n", &frottement);
+    fscanf(fp, "Largeur de la carte : %f\n", &width);
+    fscanf(fp, "Hauteur de la carte : %f\n", &height);
+    initMap(map, width, height, frottement, texture);
+    fscanf(fp, "Nombre d'obstacles : %f\nListe des obstables :\n", &nbre_obstacles);
+    for (i=0; i<nbre_obstacles; i++)
+    {
+      fscanf(fp, "%f, ", &nbre_formes);
+      for (i=0; i<nbre_formes; i++)
+      {
+        while(fgetc(fp) != '\n')
+        {
+        fscanf(fp, "%c, ", &type);
+        if (type = "c")
+        {
+          circle c;
+          Object.shapes[i].spec.circle = c;
+        }
+        if (type = "p")
+        {
+          polygone p;
+          Object.shapes[i].spec.polygone = p;
+        }
+        if (type = "s")
+        {
+          segment s;
+          Object.shapes[i].spec.segment = s;
+        }
+      }
+    }
+  }
 }

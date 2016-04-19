@@ -143,7 +143,7 @@ void updateView(Hovercraft* hovercraft){
     }
 }
 
-void updateHovercraft(Hovercraft* hovercraft){    
+void updateHovercraft(Hovercraft* hovercraft){
     if(h_object.receivedModifs!=NULL){
         Modification* current = h_object.receivedModifs;
         Modification* nextNext;

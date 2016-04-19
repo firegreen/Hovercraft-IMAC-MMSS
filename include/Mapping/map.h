@@ -23,11 +23,13 @@ typedef struct Map {
   float Bcolorevolution;
   float Gcolorevolution;
   float frottement;
+  GLuint textureid;
 } Map;
 
-void initMap(Map *map, float width, float height, float frottement);
+void initMap(Map *map, float width, float height, float frottement, const char* file_name);
 void addObjectToMap(Map *map, Object* o, Point2D position);
 void updateMap(Map *map);
 void applyFrottement(const Map* map, Object* o);
 void drawMap(const Map* map);
+Map read_fichier(char* path);
 #endif
