@@ -105,5 +105,12 @@ void drawButton(Button* b){
 }
 
 void drawMenu(const Menu* m){
-
+ glColor4f(1,1,1,1);
+ glBegin(GL_QUADS);
+    glVertex2f(0,0);
+    glVertex2f(window.width,0);
+    glVertex2f(window.width,window.height);
+    glVertex2f(0,window.height);
+ glEnd();
+ vBitmapOutput(-50,50,m->title GLUT_BITMAP_8_BY_13);
 }
