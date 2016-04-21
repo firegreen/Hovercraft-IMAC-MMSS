@@ -1,7 +1,6 @@
 #ifndef MODE_H
 #define MODE_H
 
-#include "geometry.h"
 
 typedef enum Mode {MODE_MAINMENU, MODE_LEVELMENU, MODE_LEVEL} Mode;
 

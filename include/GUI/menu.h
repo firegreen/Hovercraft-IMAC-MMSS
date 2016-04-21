@@ -1,3 +1,6 @@
+#include "Object2D/geometry.h"
+#include "Object2D/Color.h"
+
 #ifndef MENU_H
 #define MENU_H
 

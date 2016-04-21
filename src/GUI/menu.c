@@ -62,10 +62,10 @@ void drawMenu(Button* button){
 void privateDrawButton(const Button* b,const Color4f* fore, const Color4f* back){
     glColor4f(back->r,back->g,back->b,back->a);
     glBegin(GL_QUADS);
-		glVertex2f(b->bounds.x,b->bounds.y);
-		glVertex2f(b->bounds.x2,b->bounds.y);
-		glVertex2f(b->bounds.x2,b->bounds.y2);
-		glVertex2f(b->bounds.x,b->bounds.y2);
+		glVertex2f(b->bounds.leftTop,b->bounds.rightTop);
+		glVertex2f(b->bounds.leftBottom,b->bounds.rightTop);
+		glVertex2f(b->bounds.leftBottom,b->bounds.rightBottom);
+		glVertex2f(b->bounds.leftTop,b->bounds.rightBottom);
 	glEnd();
     glColor4f(fore->r,fore->g,fore->b,fore->a);
     float width = (float)glutBitmapLength(GLUT_BITMAP_8_BY_13,(b->label))/(float)screen.width;
