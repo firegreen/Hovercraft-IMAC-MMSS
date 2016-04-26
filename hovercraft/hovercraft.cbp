@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="hovercraft" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/hovercraft" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="C:/Users/Sophie/Documents/Cours IMAC/opengl/Hovercraft-IMAC-MMSS/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-lSDL -lmingw32 -lSDLmain  -lSDL_image -lopengl32 -lglu32 -lfreeglut" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="../include/GUI/control.h" />
+		<Unit filename="../include/GUI/level.h" />
+		<Unit filename="../include/GUI/menu.h" />
+		<Unit filename="../include/GUI/mode.h" />
+		<Unit filename="../include/Mapping/camera.h" />
+		<Unit filename="../include/Mapping/map.h" />
+		<Unit filename="../include/Mapping/quadTree.h" />
+		<Unit filename="../include/Object2D/Color.h" />
+		<Unit filename="../include/Object2D/geometry.h" />
+		<Unit filename="../include/Object2D/hovercraft.h" />
+		<Unit filename="../include/Object2D/object.h" />
+		<Unit filename="../include/SDL_tools.h" />
+		<Unit filename="../include/game.h" />
+		<Unit filename="../include/image_src.h" />
+		<Unit filename="../src/GUI/control.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/GUI/level.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/GUI/menu.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/GUI/mode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/Mapping/camera.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/Mapping/map.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/Mapping/quadTree.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/Object2D/Color.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/Object2D/geometry.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/Object2D/hovercraft.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/Object2D/object.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/SDL_tools.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/game.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/image_src.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

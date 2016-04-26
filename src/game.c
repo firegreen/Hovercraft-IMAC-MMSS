@@ -22,7 +22,7 @@
 void drawGame(){
     switch (Game.currentMode) {
     case MODE_MAINMENU :
-        drawMenu(&Game.currentModeStruct->menu);
+        drawMenu(Game.currentModeStruct->menu);
         break;
     case MODE_LEVEL :
         drawLevel(&(Game.currentModeStruct->level));
@@ -83,15 +83,19 @@ void initGameAudio(){
 }
 
 void initializeGame(){
-
+    char fakeParam[] = "fake";
+    char *fakeargv[] = { fakeParam, NULL };
+    int fakeargc = 1;
+    glutInit( &fakeargc, fakeargv);
     Game.windowWidth = 640;
     Game.windowHeight = 480;
     Game.fullscreen = 0;
-    Game.currentMode = MODE_LEVEL;
+    Game.currentMode = MODE_MAINMENU;
     Game.currentModeStruct = malloc(sizeof(ModeStruct));
+    Game.currentModeStruct->menu=initMainMenu();/*
     Game.currentModeStruct->level.players = malloc(1*sizeof(Hovercraft));
     Game.currentModeStruct->level.nbPlayers=1;
-    initHovercraft(Game.currentModeStruct->level.players);
+    initHovercraft(Game.currentModeStruct->level.players);*/
     Object* o = malloc(sizeof(Object));
     makeObject(o,1,1,1,3,1,0,0);
     o->effectDelays[0]=1;
@@ -120,10 +124,10 @@ void initializeGame(){
     initialize_window(Game.windowWidth,Game.windowHeight,Game.fullscreen);
     initGameAudio();
     playAudioFadeIn(Game.audioIDs[MAINAUDIO1],0.1);
-    SDL_PauseAudio(0);
+    SDL_PauseAudio(0);/*
     initMap(&(Game.currentModeStruct->level.map),500,750,0.02);
     addObjectToMap(&(Game.currentModeStruct->level.map),o,makePoint(o->x,o->y));
-    addObjectToMap(&(Game.currentModeStruct->level.map),o2,makePoint(o2->x,o2->y));
+    addObjectToMap(&(Game.currentModeStruct->level.map),o2,makePoint(o2->x,o2->y));*/
 
 }
 
