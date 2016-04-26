@@ -22,7 +22,7 @@
 void drawGame(){
     switch (Game.currentMode) {
     case MODE_MAINMENU :
-        drawMenu();
+        drawMenu(&Game.currentModeStruct->menu);
         break;
     case MODE_LEVEL :
         if(Game.specialMode)
@@ -102,6 +102,31 @@ void initializeGame(){
     Game.fullscreen = 0;
     Game.currentMode = MODE_LEVEL;
     Game.currentModeStruct = malloc(sizeof(ModeStruct));
+<<<<<<< HEAD
+=======
+    Game.currentModeStruct->level.players = malloc(1*sizeof(Hovercraft));
+    Game.currentModeStruct->level.nbPlayers=1;
+    initHovercraft(Game.currentModeStruct->level.players);
+    Object* o = malloc(sizeof(Object));
+    makeObject(o,1,1,1,3,1,0,0);
+    o->effectDelays[0]=1;
+    Effect e;
+    e.rebound.resistance = 40;
+    e.rebound.rebound_value = 1;
+    o->effectsAtCollision[0]=e;
+    o->effectsTypesAtCollision[0]=POINTSPLUS;
+    makeCircle(o->shapes,3,makePoint(0,0));
+    o->x = -10; o->y = 10;
+
+    Object* o2 = malloc(sizeof(Object));
+    makeObject(o2,1,1,1,3,1,0,0);
+    o2->effectDelays[0]=1;
+    o2->effectsAtCollision[0]=e;
+    o2->effectsTypesAtCollision[0]=REBOUND;
+    makeCircle(o2->shapes,3,makePoint(0,0));
+    o2->x = 0; o2->y = -10;
+
+>>>>>>> master
     int i = 0;
     int max =SDL_NumJoysticks()>NBJOYSTICK?NBJOYSTICK:SDL_NumJoysticks();
     for(;i<max;i++){

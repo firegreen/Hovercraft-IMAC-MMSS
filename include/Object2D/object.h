@@ -16,6 +16,7 @@
 typedef enum EFFECT_TYPE {MAX_SPEED, ACCELERATION, REBOUND, SPEED, POINTSMODIF} EFFECT_TYPE;
 typedef enum SHAPE_TYPE {POLYGON, SEGMENT, CIRCLE} SHAPE_TYPE;
 
+
 typedef union Effect {
   struct { float ammount; } points;
   struct { float acceleration_value;} acceleration;

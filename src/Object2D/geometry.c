@@ -29,10 +29,21 @@ Bounds4P makeBounds4P(float x1, float y1, float x2, float y2){
     return retour;
 }
 
+<<<<<<< HEAD
 Bounds2P makeBounds2P(float x1, float y1, float x2, float y2){
     Bounds2P retour;
     retour.leftTop.x = x1; retour.leftTop.y = y1;
     retour.rightBottom.x = x2; retour.rightBottom.y = y2;
+=======
+Bounds6F makeBounds6F(float x1, float y1, float width, float height){
+    Bounds6F retour;
+    retour.x1 = x1;
+    retour.y1 = y1;
+    retour.height = height;
+    retour.width = width;
+    retour.x2 = width+x1;
+    retour.y2 = height+y1;
+>>>>>>> master
     return retour;
 }
 

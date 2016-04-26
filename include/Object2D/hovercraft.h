@@ -4,6 +4,10 @@
 #include "Mapping/camera.h"
 #include "Object2D/object.h"
 
+typedef struct DirectionStack {
+
+} DirectionStack;
+
 typedef struct Hovercraft{
   struct Object physical_body;
 
@@ -22,7 +26,12 @@ typedef struct Hovercraft{
 
 } Hovercraft;
 
+<<<<<<< HEAD
 void initHovercraft(Hovercraft* hovercraft, const Map *map);
+=======
+
+void initHovercraft(Hovercraft* hovercraft);
+>>>>>>> master
 void drawHovercraft(const Hovercraft* hovercraft);
 void updateHovercraft(Hovercraft* hovercraft);
 

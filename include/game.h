@@ -17,7 +17,11 @@ typedef enum { ONETEXTURE=0, TWOTEXTURE, THREETEXTURE, NBTEXTURES} TextureID;
 
 typedef union ModeStruct {
     Level level;
+<<<<<<< HEAD
     //caMenu menu;
+=======
+    Menu menu;
+>>>>>>> master
 } ModeStruct;
 
 struct Game{
