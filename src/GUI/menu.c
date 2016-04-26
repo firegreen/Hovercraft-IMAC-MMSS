@@ -63,19 +63,12 @@ Button makeButton(char *label, Bounds6F bounds, Color4f fore, Color4f back, void
 void privateDrawButton(const Button* b,const Color4f* fore, const Color4f* back){
     glColor4f(back->r,back->g,back->b,back->a);
     glBegin(GL_QUADS);
-<<<<<<< HEAD
-    glVertex2f(b->bounds.x1,b->bounds.y1);
-    glVertex2f(b->bounds.x2,b->bounds.y1);
-    glVertex2f(b->bounds.x2,b->bounds.y2);
-    glVertex2f(b->bounds.x1,b->bounds.y2);
-    glEnd();
-=======
 		glVertex2f(b->bounds.leftTop,b->bounds.rightTop);
 		glVertex2f(b->bounds.leftBottom,b->bounds.rightTop);
 		glVertex2f(b->bounds.leftBottom,b->bounds.rightBottom);
 		glVertex2f(b->bounds.leftTop,b->bounds.rightBottom);
 	glEnd();
->>>>>>> d598967e53a2616e54207fee7f9563786750be96
+
     glColor4f(fore->r,fore->g,fore->b,fore->a);
     glBegin(GL_LINE_LOOP);
     glVertex2f(b->bounds.x1,b->bounds.y1);
