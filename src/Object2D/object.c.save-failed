@@ -247,7 +247,7 @@ int collision_P_P(const Shape *shape1, Point2D p1, float angle1,
             isIn = collision_S_V(A1,B1,A2,B2,intersect);
             if(!isIn) break;
         }
-        if(isIn){
+        if(intersect){
             A2  = makeTranslateAndRotate(shape2->spec.polygon.points[j],p2.x,p2.y,angle2);
             B2  = makeTranslateAndRotate(shape2->spec.polygon.points[0],p2.x,p2.y,angle2);
             isIn = collision_S_V(A1,B1,A2,B2,intersect);
@@ -264,7 +264,7 @@ int collision_P_P(const Shape *shape1, Point2D p1, float angle1,
         isIn = collision_S_V(A1,B1,A2,B2,intersect);
         if(!isIn) break;
     }
-    if(isIn){
+    if(intersect){
         A2  = makeTranslateAndRotate(shape2->spec.polygon.points[j],p2.x,p2.y,angle2);
         B2  = makeTranslateAndRotate(shape2->spec.polygon.points[0],p2.x,p2.y,angle2);
         isIn = collision_S_V(A1,B1,A2,B2,intersect);
@@ -368,21 +368,18 @@ int handleCollision(Object *o1, Object *o2){
             o1->life -= o2->strenth;
         if(!o2->isUnbreakable)
             o2->life -= o1->strenth;
-        o1->x -= o1->vx/2;
-        o1->y -= o1->vy/2;
-        o2->x -= o2->vx/2;
-        o2->y -= o2->vy/2;
-        if(o1->life>0){
-            for(i=0;i<o2->nbEffect;i++){
-                setModifications(o2->effectsTypesAtCollision[i],o2->effectsAtCollision[i],
-                                 o2->effectDelays[i],inter,o1);
+        o1->x += o1->vx/2;
+        o1->y += o1->vy/2;
+        o2->x += o2->vx/2;
+        o2->y += o2->vy/2;
+        if(o2->life>0){
+            for(i=0;i<o1->nbEffect;i++){
+                setModifications(o1->effectsTypesAtCollision[i],o1->effectsAtCollision[i],5,inter,o2);
             }
         }
-        if(o2->life>0){
-            //inter.normal1 = inter.normal2;
-            for(i=0;i<o1->nbEffect;i++){
-                setModifications(o1->effectsTypesAtCollision[i],o1->effectsAtCollision[i],
-                                 o1->effectDelays[i],inter,o2);
+        if(o1->life>0){
+            for(i=0;i<o2->nbEffect;i++){
+                setModifications(o2->effectsTypesAtCollision[i],o2->effectsAtCollision[i],5,inter,o1);
             }
         }
         return 1;
@@ -414,30 +411,26 @@ int applyEffectToObject(Modification *modif, Object *o){
             float resistanceX = fabs(modif->effect.rebound.resistance * modif->intersection.normal1.x);
             float resistanceY = fabs(modif->effect.rebound.resistance * modif->intersection.normal1.y);
             if(resistanceX < fabs(o->vx)){
-                if(o->vx>0)
-                    o->vx -= resistanceX;
-                else
-                    o->vx += resistanceX;
+                o->vx += resistanceX;
             }
             else{
                 valueX = modif->intersection.normal1.x *
                          modif->effect.rebound.rebound_value *
-                         fabs(o->vx);
-                o->vx += valueX - o->ax/2;
+                         fabs(o->vx - o->ax);
                 o->ax = valueX;
+                o->vx += o->ax;
+                o->x += o->vx;
             }
             if(resistanceY < fabs(o->vy)){
-                if(o->vy>0)
-                    o->vy -= resistanceY;
-                else
-                    o->vy += resistanceY;
+                o->vy += resistanceY;
             }
             else{
                 valueY = modif->intersection.normal1.y *
                          modif->effect.rebound.rebound_value *
-                         fabs(o->vy);
-                o->vy += valueY - o->ay/2;
+                         fabs(o->vy - o->ay);
                 o->ay = valueY;
+                o->vy = o->ay;
+                o->y += o->vy;
             }
         }
         return 1;

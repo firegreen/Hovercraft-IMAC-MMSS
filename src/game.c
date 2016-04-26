@@ -25,7 +25,10 @@ void drawGame(){
         drawMenu();
         break;
     case MODE_LEVEL :
-        drawLevel(&(Game.currentModeStruct->level));
+        if(Game.specialMode)
+            specialDrawLevel(&(Game.currentModeStruct->level),Game.specialState);
+        else
+            drawLevel(&(Game.currentModeStruct->level));
         break;
     default :
         break;
@@ -42,7 +45,10 @@ void update(){
     }
     switch (Game.currentMode) {
     case MODE_LEVEL:
-        updateLevel(&(Game.currentModeStruct->level));
+        if(Game.specialMode)
+            Game.specialMode = specialUpdateLevel(&Game.currentModeStruct->level,&Game.specialState);
+        else
+            updateLevel(&Game.currentModeStruct->level);
         break;
     case MODE_MAINMENU:
         //updateMenu(Game.currentModeStruct->menu);
@@ -82,6 +88,13 @@ void initGameAudio(){
     Game.audioIDs[ACCAUDIO] = makeAudio("hovercraft.wav",1,50);
 }
 
+void initGameTextures(){
+    glGenTextures(NBTEXTURES, Game.textureIDs);
+    makeTexture(Game.textureIDs[ONETEXTURE],"images/un.png",GL_RGBA);
+    makeTexture(Game.textureIDs[TWOTEXTURE],"images/deux.png",GL_RGBA);
+    makeTexture(Game.textureIDs[THREETEXTURE],"images/trois.png",GL_RGBA);
+}
+
 void initializeGame(){
 
     Game.windowWidth = 640;
@@ -89,42 +102,21 @@ void initializeGame(){
     Game.fullscreen = 0;
     Game.currentMode = MODE_LEVEL;
     Game.currentModeStruct = malloc(sizeof(ModeStruct));
-    Game.currentModeStruct->level.players = malloc(1*sizeof(Hovercraft));
-    Game.currentModeStruct->level.nbPlayers=1;
-    initHovercraft(Game.currentModeStruct->level.players);
-    Object* o = malloc(sizeof(Object));
-    makeObject(o,1,1,1,3,1,0,0);
-    o->effectDelays[0]=1;
-    Effect e;
-    e.rebound.resistance = 40;
-    e.rebound.rebound_value = 1;
-    o->effectsAtCollision[0]=e;
-    o->effectsTypesAtCollision[0]=REBOUND;
-    makeCircle(o->shapes,3,makePoint(0,0));
-    o->x = -10; o->y = 10;
-
-    Object* o2 = malloc(sizeof(Object));
-    makeObject(o2,1,1,1,3,1,0,0);
-    o2->effectDelays[0]=1;
-    o2->effectsAtCollision[0]=e;
-    o2->effectsTypesAtCollision[0]=REBOUND;
-    makeCircle(o2->shapes,3,makePoint(0,0));
-    o2->x = 0; o2->y = -10;
-
     int i = 0;
     int max =SDL_NumJoysticks()>NBJOYSTICK?NBJOYSTICK:SDL_NumJoysticks();
     for(;i<max;i++){
         initJoystick(Game.joysticks+i,i);
     }
+
     loadConfig();
     initialize_window(Game.windowWidth,Game.windowHeight,Game.fullscreen);
     initGameAudio();
-    playAudioFadeIn(Game.audioIDs[MAINAUDIO1],0.1);
+    initGameTextures();
+    playAudioFadeIn(Game.audioIDs[MAINAUDIO2],0.1);
     SDL_PauseAudio(0);
-    initMap(&(Game.currentModeStruct->level.map),500,750,0.02);
-    addObjectToMap(&(Game.currentModeStruct->level.map),o,makePoint(o->x,o->y));
-    addObjectToMap(&(Game.currentModeStruct->level.map),o2,makePoint(o2->x,o2->y));
-
+    initLevel(&Game.currentModeStruct->level,1,1);
+    Game.specialState = 0;
+    Game.specialMode = 1;
 }
 
 
@@ -141,9 +133,8 @@ void game(){
         }
         update();
         glMatrixMode(GL_MODELVIEW);
-        glClearColor(1,1,1,1);
+        glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
-        glLoadIdentity();
         drawGame();
         SDL_GL_SwapBuffers();
         unsigned int delay = SDL_GetTicks() - startTime;

@@ -7,11 +7,12 @@ struct Map;
 typedef enum NodePosition {LEFT_TOP=0,LEFT_BOTTOM,RIGHT_TOP,RIGHT_BOTTOM} NodePosition;
 
 struct Object;
-typedef struct Chained_Object{
+struct Chained_Object{
     struct Object* object;
     Point2D position;
     struct Chained_Object* next;
-} Chained_Object;
+};
+typedef struct Chained_Object Chained_Object;
 
 typedef struct Node{
     Chained_Object* objects;

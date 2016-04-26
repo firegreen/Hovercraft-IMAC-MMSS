@@ -22,10 +22,9 @@ typedef struct Hovercraft{
 
 } Hovercraft;
 
-void initHovercraft(Hovercraft* hovercraft);
+void initHovercraft(Hovercraft* hovercraft, const Map *map);
 void drawHovercraft(const Hovercraft* hovercraft);
 void updateHovercraft(Hovercraft* hovercraft);
-void updateView(Hovercraft* hovercraft);
 
 
 #endif

@@ -1,100 +1,155 @@
 #include "GUI/level.h"
+#include "Mapping/camera.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL_tools.h>
+#include "game.h"
 
-void drawView(const Map* map, const Hovercraft* hovercraft){
-    float scaleX = (2*GLREPERE)/(hovercraft->view.rightBottom.x - hovercraft->view.leftTop.x);
-    float scaleY = (2*GLREPERE)/(hovercraft->view.leftTop.y - hovercraft->view.rightBottom.y);
-    glScalef(scaleX,scaleY,1.);
-    float translateX,translateY;
-    if(hovercraft->view.leftTop.x < map->bounds.leftTop.x)
-        translateX = -GLREPERE/scaleX - map->bounds.leftTop.x;
-    else if (hovercraft->view.rightBottom.x > map->bounds.rightBottom.x)
-        translateX = GLREPERE/scaleX - map->bounds.rightBottom.x;
-    else
-        translateX = -GLREPERE/scaleX - hovercraft->view.leftTop.x;
+Color4f white =  { 1, 1, 1, 1};
+Color4f black =  { 0, 0, 0, 1};
+Color4f red =  { 1, 0, 0, 1};
+Color4f green =  { 0, 1, 0, 1};
+Color4f blue =  { 0, 0, 1, 1};
 
-    if(hovercraft->view.leftTop.y > map->bounds.leftTop.y)
-        translateY = GLREPERE/scaleY - map->bounds.leftTop.y;
-    else if (hovercraft->view.rightBottom.y < map->bounds.rightBottom.y)
-        translateY = -GLREPERE/scaleY - map->bounds.rightBottom.y;
-    else
-        translateY = GLREPERE/scaleY - hovercraft->view.leftTop.y;
-
-    glTranslatef(translateX, translateY,0);
-    drawMap(map);
-    drawHovercraft(hovercraft);
+void drawView(const Level* l, int currentHovercraft){
+    applyCameraTransform(&l->players[currentHovercraft].view, -window.orthoGLX, -window.orthoGLY,
+                         window.orthoGLX, window.orthoGLY);
+    drawMap(&l->map);
+    int i;
+    for(i=0;i<l->nbPlayers;i++)
+        drawHovercraft(l->players+i);
 }
 
-void drawLevelForOnePlayer(const Level* level){
-    glViewport(0,0,window.width,window.height);
-    drawView(&(level->map), level->players);
+void specialDrawView(const Level* l, int currentHovercraft, float state){
+    if(state<20){
+        float coef = (0.8 + state/100.);
+        glPushMatrix();
+        glScalef(coef,coef,1);
+        drawView(l,currentHovercraft);
+        glPopMatrix();
+    }
+    else if(state<50){
+        drawView(l,currentHovercraft);
+        Bounds2P b = makeBounds2P(l->players[currentHovercraft].view.leftTop.x,
+                                   l->players[currentHovercraft].view.leftTop.y,
+                                   l->players[currentHovercraft].view.rightBottom.x,
+                                   l->players[currentHovercraft].view.rightBottom.y);
+        glPushMatrix();
+        if(state<30){
+            glScalef(0.5+(state-20.)/100.,0.5+(state-20.)/100.,1);
+            drawTextureQuad(Game.textureIDs[ONETEXTURE], &white, &b);
+        }
+        else if(state<40){
+            glScalef(0.5+(state-30.)/100.,0.5+(state-30.)/100.,1);
+            drawTextureQuad(Game.textureIDs[TWOTEXTURE], &white, &b);
+        }
+        else{
+            glScalef(0.5+(state-40.)/100.,0.5+(state-40.)/100.,1);
+            drawTextureQuad(Game.textureIDs[THREETEXTURE], &white, &b);
+        }
+        glPopMatrix();
+    }
 }
 
-void drawLevelForTwoPlayer(const Level* level){
-    int width=window.width/2;
-    glViewport(0,0,width,window.height);
-    drawView(&(level->map), level->players);
-    glViewport(width,0,width,window.height);
-    drawView(&(level->map), level->players+1);
-}
-void drawLevelForThreePlayer(const Level* level){
-    int width=window.width/2;
-    int height=window.height/2;
-    glViewport(0,0,width,height);
-    drawView(&(level->map), level->players);
-    glViewport(width,0,width,height);
-    drawView(&(level->map), level->players+1);
-    glViewport(0,height,width,height);
-    drawView(&(level->map), level->players+2);
+void specialDrawLevel(const Level *level, float state){
+    if(state<50){
+        int i,j,line=0;
+        int width, height = window.height/((level->nbPlayers+1)/2);
+        for(i=level->nbPlayers;i>0;i-=2){
+            width = window.width/((i+1)%2+1);
+            for(j=0;j<(i+1)%2+1;j++)
+            {
+                glViewport(width*j,height*line,width,height);
+                glMatrixMode(GL_MODELVIEW);
+                glLoadIdentity();
+                specialDrawView(level, (level->nbPlayers-i)+j, state);
+            }
+            line++;
+        }
+    }
+    else{
+
+    }
 }
 
-void drawLevelForFourPlayer(const Level* level){
-    int width=window.width/2;
-    int height=window.height/2;
-    glViewport(0,0,width,height);
-    drawView(&(level->map), level->players);
-    glViewport(width,0,width,height);
-    drawView(&(level->map), level->players+1);
-    glViewport(0,height,width,height);
-    drawView(&(level->map), level->players+2);
-    glViewport(width,height,width,height);
-    drawView(&(level->map), level->players+3);
+int specialUpdateLevel(const Level *level, float *state){
+    if(*state<20){
+        (*state) +=0.75;
+        return *state<50.;
+    }
+    else if(*state<50){
+        (*state) +=0.25;
+        return *state<50.;
+    }
+    else{
+        (*state) +=0.5;
+        return *state<100.;
+    }
 }
+
+void initLevel(Level *level, int mapid, int nbplayers){
+    char strfile[10];
+    memset(strfile,0,10);
+    strcpy(strfile,"map/");
+    itoa(mapid,strfile+4,10);
+    int error;
+    readFile(&level->map,strfile,&error);
+    if(error!=NOERROR){
+        fprintf(stderr,"Error while reading map %d, exit...\n",mapid);
+        exit(1);
+    }
+    level->nbPlayers = nbplayers;
+    level->players = malloc(sizeof(Hovercraft)*nbplayers);
+    int i;
+    float angle=0;
+    for(i=0;i<nbplayers;i++){
+        initHovercraft(level->players+i,&level->map);
+        level->players[i].physical_body.x += 5*cos(angle);
+        level->players[i].physical_body.y += 5*sin(angle);
+        level->players[i].physical_body.angle = angle*180./M_PI;
+        angle+=M_PI/2.;
+        updateViewOfHovercraft(level->players+i);
+    }
+}
+
 void drawLevel(const Level* level){
-    switch(level->nbPlayers){
-    case 1:
-        drawLevelForOnePlayer(level);
-        break;
-    case 2:
-        drawLevelForTwoPlayer(level);
-        break;
-    case 3:
-        drawLevelForThreePlayer(level);
-        break;
-    case 4:
-        drawLevelForFourPlayer(level);
-        break;
+    int i,j,line=0;
+    int width, height = window.height/((level->nbPlayers+1)/2);
+    for(i=level->nbPlayers;i>0;i-=2){
+        width = window.width/((i+1)%2+1);
+        for(j=0;j<(i+1)%2+1;j++)
+        {
+            glViewport(width*j,height*line,width,height);
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            drawView(level, (level->nbPlayers-i)+j);
+        }
+        line++;
     }
 }
 
 void updateLevel(Level* level){
     updateMap(&(level->map));
-    int i =0;
+    int i =0,j;
     Chained_Object* co;
     Chained_Object* coNext;
     for(;i<level->nbPlayers;i++){
         applyFrottement(&(level->map), &(level->players[i].physical_body));
         updateHovercraft(level->players+i);
+        for(j=0;j<i;j++)
+        {
+            handleCollision(&(level->players[i].physical_body),&(level->players[j].physical_body));
+        }
+        for(j=i+1;j<level->nbPlayers;j++){
+            handleCollision(&(level->players[i].physical_body),&(level->players[j].physical_body));
+        }
         if(level->map.objects!=NULL){
             co = level->map.objects;
             while(co->next!=NULL){
-                handleCollision(&(level->players[i].physical_body),co->next->object);
+                handleCollision(co->next->object,&(level->players[i].physical_body));
                 if(co->next->object->life > 0){
                     updateObject(co->next->object);
-                    applyFrottement(&(level->map), co->next->object);
                     co=co->next;
                 }
                 else{
@@ -103,10 +158,9 @@ void updateLevel(Level* level){
                     co->next = coNext;
                 }
             }
-            handleCollision(&(level->players[i].physical_body),level->map.objects->object);
+            handleCollision(level->map.objects->object,&(level->players[i].physical_body));
             if(level->map.objects->object->life > 0){
                 updateObject(level->map.objects->object);
-                applyFrottement(&(level->map), level->map.objects->object);
             }
             else{
                 coNext = level->map.objects->next;
@@ -114,6 +168,12 @@ void updateLevel(Level* level){
                 level->map.objects = coNext;
             }
         }
+        updateViewOfHovercraft(level->players+i);
+    }
+    co = level->map.objects;
+    while(co!=NULL){
+        applyFrottement(&level->map,level->map.objects->object);
+        co = co->next;
     }
 
 }
@@ -129,7 +189,8 @@ void handleEventLevel(Level *l, const SDL_Event *event){
             l->players[0].view.leftTop.y+=10;
             l->players[0].view.rightBottom.y-=10;
         }
-        else if(event->button.button == SDL_BUTTON_WHEELUP){
+        else if(event->button.button == SDL_BUTTON_WHEELUP)
+        {
             l->players[0].view.leftTop.x+=10;
             l->players[0].view.rightBottom.x-=10;
             l->players[0].view.leftTop.y-=10;
@@ -158,7 +219,7 @@ void handleEventLevel(Level *l, const SDL_Event *event){
                     l->players[0].view.rightBottom.x-=10;
                     l->players[0].view.leftTop.y-=10;
                     l->players[0].view.rightBottom.y+=10;
-                    updateView(l->players);
+                    updateViewOfHovercraft(l->players);
                 }
             }
             break;
@@ -171,7 +232,7 @@ void handleEventLevel(Level *l, const SDL_Event *event){
                     l->players[0].view.rightBottom.x+=10;
                     l->players[0].view.leftTop.y+=10;
                     l->players[0].view.rightBottom.y-=10;
-                    updateView(l->players);
+                    updateViewOfHovercraft(l->players);
                 }
             }
             break;

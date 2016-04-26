@@ -13,6 +13,8 @@
 #include "Object2D/object.h"
 #include "quadTree.h"
 
+typedef enum READERROR { EOFREACHED, BADFORMAT, FILENOTEXIST, NOERROR } ReadError;
+
 typedef struct Map {
   float width, height;
   Bounds4P bounds;
@@ -31,5 +33,6 @@ void addObjectToMap(Map *map, Object* o, Point2D position);
 void updateMap(Map *map);
 void applyFrottement(const Map* map, Object* o);
 void drawMap(const Map* map);
-Map read_fichier(char* path);
+void readFile(Map *m, char* path, int *error);
+
 #endif

@@ -20,14 +20,18 @@
 #define INITIALVIEWSIZE 55
 #define h_object (hovercraft->physical_body)
 
-void initHovercraft(Hovercraft* hovercraft){
-    makeObject(&(h_object),0,2,100,6,0,10,0);
-    makeRectangle(h_object.shapes+1,-1.6,2,3.2,4);
-    makeCircle(h_object.shapes,1.6,makePoint(0,2.3f));
-    h_object.shapes[0].color = makeColor3f(0.3,0.2,0.5);
-    h_object.shapes[1].color = makeColor3f(0.2,0.2,0.4);
+void initHovercraft(Hovercraft* hovercraft, const Map* map){
+    makeObject(&(h_object),1,2,100,6,0,10,0);
+    makeRectangle(h_object.shapes+1,-1.6,2,3.2,4,makeColor4f(0.3,0.2,0.5,1),1);
+    makeCircle(h_object.shapes,1.6,makePoint(0,2.3f),makeColor4f(0.2,0.2,0.4,1),1);
 
-    hovercraft->moteur = 0.03;
+    Effect e;
+    e.rebound.resistance = 100;
+    e.rebound.rebound_value =1;
+    hovercraft->physical_body.effectDelays[0]=2;
+    hovercraft->physical_body.effectsAtCollision[0] = e;
+    hovercraft->physical_body.effectsTypesAtCollision[0] = REBOUND;
+    hovercraft->moteur = 0.045;
     hovercraft->max_linear_speed=1.5;
 
     h_object.angle =0;
@@ -36,111 +40,14 @@ void initHovercraft(Hovercraft* hovercraft){
 
     hovercraft->points=0;
     hovercraft->linearAccelerate = hovercraft->rotationAccelerate = 0;
-
-    hovercraft->view.leftTop.x = h_object.x - INITIALVIEWSIZE;
-    hovercraft->view.leftTop.y = h_object.y + INITIALVIEWSIZE;
-    hovercraft->view.rightBottom.x = h_object.x + INITIALVIEWSIZE;
-    hovercraft->view.rightBottom.y = h_object.y - INITIALVIEWSIZE;
+    makeCamera(&hovercraft->view,INITIALVIEWSIZE*2,INITIALVIEWSIZE*2,map);
 }
 
 void drawHovercraft(const Hovercraft* hovercraft){
     glPushMatrix();
     drawObject(&(h_object));
     glPopMatrix();
-    float width = hovercraft->view.rightBottom.x - hovercraft->view.leftTop.x;
-    float height = hovercraft->view.leftTop.y - hovercraft->view.rightBottom.y;
-    float borne = hovercraft->max_linear_speed/2.;
-    float margeDX,margeDY;
-    float a,b;
-    if(h_object.vx < borne && h_object.vx > -borne){
-        a = (- width/10.) / borne;
-        b = width/2.;
-    }
-    else{
-        a = (width / 8.) / borne;
-        b = 0.275*width;
-    }
-    margeDX =(a * fabs(h_object.vx) + b);
-    if(h_object.vy < borne && h_object.vy > -borne){
-        a = (- height/10.) / borne;
-        b = height/2.;
-    }
-    else{
-        a = (height / 8.) / borne;
-        b = 0.275*height;
-    }
-    margeDY =(a * fabs(h_object.vy) + b);
-
     glColor3f(0.7,0.1,0.1);
-    glBegin(GL_LINES);
-    glVertex2f(hovercraft->view.leftTop.x,hovercraft->view.leftTop.y - margeDY);
-    glVertex2f(hovercraft->view.rightBottom.x,hovercraft->view.leftTop.y - margeDY);
-    glEnd();
-    glColor3f(0.1,0.1,0.7);
-    glBegin(GL_LINES);
-    glVertex2f(hovercraft->view.leftTop.x,hovercraft->view.rightBottom.y + margeDY);
-    glVertex2f(hovercraft->view.rightBottom.x,hovercraft->view.rightBottom.y + margeDY);
-    glEnd();
-    glColor3ub(0.1,0.7,0.1);
-    glBegin(GL_LINES);
-    glVertex2f(hovercraft->view.rightBottom.x - margeDX,hovercraft->view.rightBottom.y);
-    glVertex2f(hovercraft->view.rightBottom.x - margeDX,hovercraft->view.leftTop.y);
-    glEnd();
-    glColor3ub(0.7,0.1,0.7);
-    glBegin(GL_LINES);
-    glVertex2f(hovercraft->view.leftTop.x + margeDX,hovercraft->view.rightBottom.y);
-    glVertex2f(hovercraft->view.leftTop.x +margeDX,hovercraft->view.leftTop.y);
-    glEnd();
-}
-
-void updateView(Hovercraft* hovercraft){
-    float width = hovercraft->view.rightBottom.x - hovercraft->view.leftTop.x;
-    float height = hovercraft->view.leftTop.y - hovercraft->view.rightBottom.y;
-    float borne = hovercraft->max_linear_speed/2.;
-    float margeDX,margeDY;
-    float a,b;
-    if(h_object.vx < borne && h_object.vx > -borne){
-        a = (- width/10.) / borne;
-        b = width/2.;
-    }
-    else{
-        a = (width / 8.) / borne;
-        b = 0.275*width;
-    }
-    margeDX =(a * fabs(h_object.vx) + b);
-    if(h_object.vy < borne && h_object.vy > -borne){
-        a = (- height/10.) / borne;
-        b = height/2.;
-    }
-    else{
-        a = (height / 8.) / borne;
-        b = 0.275*height;
-    }
-    margeDY = (a * fabs(h_object.vy) + b);
-    if(h_object.vx>0){
-        if(h_object.x>hovercraft->view.rightBottom.x - margeDX){
-            hovercraft->view.rightBottom.x = h_object.x + margeDX;
-            hovercraft->view.leftTop.x = hovercraft->view.rightBottom.x - width;
-        }
-    }
-    else{
-        if(h_object.x<hovercraft->view.leftTop.x + margeDX){
-            hovercraft->view.leftTop.x = h_object.x - margeDX;
-            hovercraft->view.rightBottom.x = hovercraft->view.leftTop.x + width;
-        }
-    }
-    if(h_object.vy>0){
-        if(h_object.y>hovercraft->view.leftTop.y-margeDY){
-            hovercraft->view.leftTop.y = h_object.y + margeDY;
-            hovercraft->view.rightBottom.y = hovercraft->view.leftTop.y - height;
-        }
-    }
-    else{
-        if(h_object.y<hovercraft->view.rightBottom.y+margeDY){
-            hovercraft->view.rightBottom.y = h_object.y - margeDY;
-            hovercraft->view.leftTop.y = hovercraft->view.rightBottom.y + height;
-        }
-    }
 }
 
 void updateHovercraft(Hovercraft* hovercraft){
@@ -198,5 +105,4 @@ void updateHovercraft(Hovercraft* hovercraft){
     }
 
     updateObject(&h_object);
-    updateView(hovercraft);
 }

@@ -12,14 +12,15 @@
 #include "GUI/menu.h"
 
 Level levels[NBLEVELS];
-typedef enum { MAINAUDIO1=0,MAINAUDIO2,MAINAUDIO3,ACCAUDIO,COLISIONAUDIO } AudioID;
+typedef enum { MAINAUDIO1=0,MAINAUDIO2,MAINAUDIO3,ACCAUDIO,COLISIONAUDIO, NBAUDIOS} AudioID;
+typedef enum { ONETEXTURE=0, TWOTEXTURE, THREETEXTURE, NBTEXTURES} TextureID;
 
 typedef union ModeStruct {
     Level level;
-    //Menu menu;
+    //caMenu menu;
 } ModeStruct;
 
-struct {
+struct Game{
   Mode currentMode;
   ModeStruct* currentModeStruct;
   int windowWidth, windowHeight;
@@ -27,9 +28,11 @@ struct {
   unsigned char levelIsUnLocked[NBLEVELS];
   unsigned char modeIsUnlocked[NBMODE];
   Camera currentCamera;
-  AudioID audioIDs[NBAUDIOMAX];
+  int audioIDs[NBAUDIOS];
+  GLuint textureIDs[NBTEXTURES];
   Joystick joysticks[NBJOYSTICK];
-
+  float specialState;
+  unsigned char specialMode;
 } Game;
 
 void drawGame();

@@ -18,6 +18,9 @@
 #define GL_BRG 0x80E
 #define GL_BRGA 0x801
 
+#include "Object2D/Color.h"
+#include "Object2D/geometry.h"
+
 struct {
   float width;
   float height;
@@ -46,8 +49,11 @@ typedef struct {
 } Audio;
 
 void resize_handler(float width, float height);
+void reloadGLrepere();
 void initialize_window(float width, float height, unsigned char fullscreen);
 void initialize_audio(Uint16 format, int freq, Uint8 channels, Uint16 samples);
+void makeTexture(GLuint id, const char *filename, GLint textureFormat);
+void drawTextureQuad(GLuint id, const Color4f *c, const Bounds2P *b);
 int makeAudio(const char* filename, unsigned char repeat, float volume);
 void playAudio(int id);
 void stopAudio(int id);

@@ -15,8 +15,11 @@ typedef struct Level{
   Hovercraft* players;
 } Level;
 
+void specialDrawLevel(const Level* level, float state);
+int specialUpdateLevel(const Level* level, float* state);
 void drawLevel(const Level* level);
 void updateLevel(Level* level);
+void initLevel(Level* level, int mapid, int nbplayers);
 void handleEventLevel(Level* l, const SDL_Event* event);
 
 #endif

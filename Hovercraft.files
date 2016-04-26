@@ -28,3 +28,4 @@ src/SDL_tools.c
 src/GUI/menu.c
 src/GUI/control.c
 Makefile
+map1.txt

@@ -13,7 +13,7 @@
 #endif
 
 
-typedef enum EFFECT_TYPE {MAX_SPEED, ACCELERATION, REBOUND, SPEED, POINTSPLUS, POINTMINUS} EFFECT_TYPE;
+typedef enum EFFECT_TYPE {MAX_SPEED, ACCELERATION, REBOUND, SPEED, POINTSMODIF} EFFECT_TYPE;
 typedef enum SHAPE_TYPE {POLYGON, SEGMENT, CIRCLE} SHAPE_TYPE;
 
 typedef union Effect {
@@ -27,12 +27,12 @@ typedef union Effect {
 
 typedef struct Shape{
     union {
-      struct { Point2D* points; int full; int nbPoints;} polygon;
+      struct { Point2D* points; int full; unsigned int nbPoints;} polygon;
       struct { Point2D p1,p2;} segment;
       struct { Point2D center; float radius; int full;} circle;
       /* and other...*/
     } spec;
-    Color3f color;
+    Color4f color;
     SHAPE_TYPE type;
 } Shape;
 
@@ -72,10 +72,12 @@ typedef struct Object{
 
 struct Hovercraft;
 
-void makeRectangle(Shape* shape, float x,float y,float width,float height);
-void makeInversedRectangle(Shape* shape, float x,float y,float width,float height);
-void makeCircle(Shape* shape, float r, Point2D c);
-void makeSegment(Shape* shape, Point2D p1, Point2D p2);
+void makePolygon(Shape* shape, unsigned int nbPoints, Color4f color, int full);
+void setPolygonPoint(Shape* shape, int pointIndice, Point2D p);
+void makeRectangle(Shape* shape, float x, float y, float width, float height, Color4f color, int full);
+void makeInversedRectangle(Shape* shape, float x, float y, float width, float height, Color4f color, int full);
+void makeCircle(Shape* shape, float r, Point2D c, Color4f color, int full);
+void makeSegment(Shape* shape, Point2D p1, Point2D p2, Color4f color);
 void setModifications(EFFECT_TYPE type, Effect effect, int delay, Intersection intersect, Object* o);
 void makeObject(Object* o, int nbEffect, int nbShape, float life, float colliderRadius,
                 unsigned char isStatic, float strenth, unsigned char isUnbreakable);

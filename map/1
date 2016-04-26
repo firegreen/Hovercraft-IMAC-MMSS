@@ -1,0 +1,13 @@
+texture:"images/sea.jpg" frottement:0.03 largeur:500 hauteur:500
+nbobstacles:2
+obstacles
+nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(40,60)
+formes
+type:c rayon:5 centre:(0,0) couleur:(0.1,0.5,0.1,1) rempli:1
+effets
+type:r resistance:40 rebond:1
+nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(20,-30)
+formes
+type:c rayon:5 centre:(0,0) couleur:(0.1,0.5,0.4,1) rempli:1
+effets
+type:r resistance:40 rebond:1

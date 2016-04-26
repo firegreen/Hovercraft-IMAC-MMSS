@@ -1,6 +1,8 @@
 #include "Mapping/map.h"
 #include "Object2D/object.h"
 #include <stdio.h>
+#include <stddef.h>
+#include "SDL_tools.h"
 #define SEAFILE "images/sea.jpg"
 
 #ifdef __APPLE__
@@ -11,13 +13,17 @@
 #include <SDL/SDL_image.h>
 #endif
 
-GLuint SEATEXTUREID = 0;
+#define BUFSIZE 512
+#define IMAGEPATH "images/"
+#define readLine(strin, bufsize, fp) strin[0] = 0; fgets(strin,bufsize,fp); if(!strin[0]){ *error = EOFREACHED;}
+
+char imagefile[100];
 
 void drawMap(const Map* map){
     glPushMatrix();
-    if(SEATEXTUREID){
+    if(map->textureid){
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, SEATEXTUREID);
+        glBindTexture(GL_TEXTURE_2D, map->textureid);
 
         glBegin(GL_QUADS);
 
@@ -53,7 +59,6 @@ void drawMap(const Map* map){
     }
     Chained_Object* current = map->objects;
     while(current!=NULL){
-        glColor3f(1, 1, 1);
         drawObject(current->object);
         current=current->next;
     }
@@ -86,55 +91,27 @@ void initMap(Map* map, float width, float height, float frottement, const char* 
     map->color = makeColor3f(1,1,1);
     map->Bcolorevolution = -0.003;
     map->Gcolorevolution = -0.0002;
-    if(!SEATEXTUREID){
-        SDL_Surface* image = IMG_Load(file_name);
-        if(image == NULL) {
-            fprintf(stderr, "Impossible de charger l'image %s\n", SEAFILE);
-        }
-        else{
-            glGenTextures(1, &SEATEXTUREID);
-            glBindTexture(GL_TEXTURE_2D, SEATEXTUREID);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            GLenum format;
-            switch(image->format->BytesPerPixel) {
-                case 1:
-                    format = GL_BLUE;
-                    break;
-                case 3:
-                    format = GL_RGB;
-                    break;
-                case 4:
-                    format = GL_RGBA;
-                    break;
-                default:
-                    format = GL_RGBA;
-                    fprintf(stderr, "Format des pixels de l'image %d non pris en charge - byte per pixel :%d\n",
-                            SEATEXTUREID, image->format->BytesPerPixel);
-                    glBindTexture(GL_TEXTURE_2D, 0);
-
-                    SDL_FreeSurface(image);
-                    return;
-            }
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->w, image->h, 0, format, GL_UNSIGNED_BYTE, image->pixels);
-
-            glBindTexture(GL_TEXTURE_2D, 0);
-
-            SDL_FreeSurface(image);
-        }
-
+    SDL_Surface* image = IMG_Load(file_name);
+    if(image == NULL) {
+        fprintf(stderr, "Impossible de charger l'image %s\n", file_name);
+    }
+    else{
+        glGenTextures(1, &map->textureid);
+        makeTexture(map->textureid,file_name,GL_RGB);
     }
     makeObject(&(map->physicalBounds),1,1,100,2000,1,0,1);
-    makeInversedRectangle(map->physicalBounds.shapes,-width/2.,height/2.,width,height);
-    map->physicalBounds.shapes->color=makeColor3f(25,60,98);
+    makeInversedRectangle(map->physicalBounds.shapes,-width/2.,height/2.,width,height,makeColor4f(1,1,1,1),0);
     Effect e;
-    e.rebound.resistance = 100;
-    e.rebound.rebound_value = 0.5;
+    e.rebound.resistance = 1000;
+    e.rebound.rebound_value = 0.75;
+    map->physicalBounds.effectDelays[0]=2;
     map->physicalBounds.effectsAtCollision[0]=e;
     map->physicalBounds.effectsTypesAtCollision[0]=REBOUND;
     map->objects = makeChainedObject(&(map->physicalBounds),NULL,makePoint(0,0));
 }
 
 void addObjectToMap(Map *map, struct Object *o, Point2D position){
+    static int cpt = 0; cpt++;
     if(map->objects==NULL)
     {
         map->objects = makeChainedObject(o,NULL,position);
@@ -147,55 +124,203 @@ void addObjectToMap(Map *map, struct Object *o, Point2D position){
     current->next = makeChainedObject(o,NULL,position);
 }
 
-void read_fichier(char* path, Map* map)
-{
+typedef union readValues {
+  float f;
   int i;
-  char* texture;
-  char type;
-  float frottement, width, height;
-  float nbre_obstacles, nbre_formes;
-  Object objet;
-  FILE* fp;
-  if(path != NULL)
-  {
-    fp = fopen (path, "r+");      /* Ouverture du fichier path en lecture + écriture */
-  }
-  else
-  {
-    fp = stdin;
-  }
-  while (fgetc(fp) != " ")
-  {
-    fscanf(fp, "Texture de la carte : %s\n", &texture);
-    fscanf(fp, "Frottement de la carte : %f\n", &frottement);
-    fscanf(fp, "Largeur de la carte : %f\n", &width);
-    fscanf(fp, "Hauteur de la carte : %f\n", &height);
+  char c;
+} readValues;
+
+void readFile(Map* map, char* path, int* error)
+{
+    int i,j;
+    char texture[BUFSIZE/8];
+    char type;
+    float frottement, width, height;
+    int nbre_obstacles, nbre_formes, nbeffects;
+    float life, colliderRadius, strength;
+    int isStatic, isUnbreakable;
+    Point2D pos;
+    readValues values[10];
+    char strin[BUFSIZE];
+    char strincmp[BUFSIZE/8];
+    Object* o;
+    Effect e;
+    FILE* fp;
+    if(path == NULL)
+    {
+        *error = FILENOTEXIST;
+        return;
+    }
+    fp = fopen (path, "r");
+    if(fp == NULL)
+    {
+        *error = FILENOTEXIST;
+        return;
+    }
+    readLine(strin,BUFSIZE,fp);
+    memset(texture,0,BUFSIZE/8);
+    if(sscanf(strin, "texture:\"%[^\t\n\"]\" frottement:%f largeur:%f hauteur:%f",&texture,&frottement,&width,&height)<4){
+        *error = BADFORMAT;
+        return;
+    }
     initMap(map, width, height, frottement, texture);
-    fscanf(fp, "Nombre d'obstacles : %f\nListe des obstables :\n", &nbre_obstacles);
+
+    readLine(strin,BUFSIZE,fp);
+    if(sscanf(strin, "nbobstacles:%d", &nbre_obstacles)<1)
+    {
+        *error = BADFORMAT;
+        return;
+    }
+    readLine(strin,BUFSIZ,fp);
+    memset(strincmp,0,BUFSIZE/8);
+    if(sscanf(strin,"%s",strincmp)<1)
+    {
+        *error = BADFORMAT;
+        return;
+    }
+    if(strcmp(strincmp,"obstacles"))
+    {
+        *error = BADFORMAT;
+        return;
+    }
     for (i=0; i<nbre_obstacles; i++)
     {
-      fscanf(fp, "%f, ", &nbre_formes);
-      for (i=0; i<nbre_formes; i++)
-      {
-        while(fgetc(fp) != '\n')
+        readLine(strin,BUFSIZ,fp);
+        if(sscanf(strin, "nbformes:%d nbeffets:%d vie:%f rayoncolision:%f statique:%d force:%f incassable:%d position:(%f,%f)",
+                         &nbre_formes, &nbeffects, &life, &colliderRadius, &isStatic, &strength, &isUnbreakable,
+                  &pos.x,&pos.y)<9)
         {
-        fscanf(fp, "%c, ", &type);
-        if (type = "c")
-        {
-          circle c;
-          Object.shapes[i].spec.circle = c;
+            *error = BADFORMAT;
+            return;
         }
-        if (type = "p")
+        o = malloc(sizeof(Object));
+        makeObject(o,nbeffects,nbre_formes,life,colliderRadius,isStatic,strength,isUnbreakable);
+        o->x = pos.x; o->y = pos.y;
+        readLine(strin,BUFSIZ,fp);
+        memset(strincmp,0,BUFSIZE/8);
+        if(sscanf(strin,"%s",strincmp)<1)
         {
-          polygone p;
-          Object.shapes[i].spec.polygone = p;
+            *error = BADFORMAT;
+            return;
         }
-        if (type = "s")
+        if(strcmp(strincmp,"formes"))
         {
-          segment s;
-          Object.shapes[i].spec.segment = s;
+            *error = BADFORMAT;
+            return;
         }
-      }
+        for (j=0; j<nbre_formes; j++)
+        {
+            readLine(strin,BUFSIZ,fp);
+            if(sscanf(strin,"type:%c",&type)<1)
+            {
+                *error = BADFORMAT;
+                return;
+            }
+            switch (type) {
+            case 'c':
+                if(sscanf(strin+7,"rayon:%f centre:(%f,%f) couleur:(%f,%f,%f,%f) rempli:%d",
+                          &(values[0].f),&(values[1].f),&(values[2].f),&(values[3].f),
+                          &(values[4].f),&(values[5].f),&(values[6].f),&(values[7].i))<8)
+                {
+                    *error = BADFORMAT;
+                    return;
+                }
+                makeCircle(o->shapes+j,values[0].f,makePoint(values[1].f,values[2].f),
+                        makeColor4f(values[3].f,values[4].f,values[5].f,values[6].f),values[7].i);
+                break;
+            case 'p':
+                if(sscanf(strin+7,"nbpoints:%d couleur:(%f,%f,%f,%f) rempli:%d",
+                          &(values[0].i),&(values[1].f),&(values[2].f),&(values[3].f),&(values[4].f),&(values[5].i))<6)
+                {
+                    *error = BADFORMAT;
+                    return;
+                }
+                makePolygon(o->shapes+j,values[0].i,makeColor4f(values[1].f,values[2].f,values[3].f,values[4].f),values[5].i);
+                for(j=0; j<values[0].i; j++){
+                   readLine(strin,BUFSIZ,fp);
+                   if(sscanf(strin,"(%f,%f)",&(values[0].f),&(values[1].f))<2)
+                   {
+                       *error = BADFORMAT;
+                       return;
+                   }
+                   setPolygonPoint(o->shapes+i,j,makePoint(values[0].f,values[1].f));
+                }
+                break;
+            case 's':
+                if(sscanf(strin+7,"p1:(%f,%f) p2:(%f,%f) couleur:(%f,%f,%f,%f)",
+                          &(values[0].f),&(values[1].f),&(values[2].f),&(values[3].f),
+                          &(values[4].f),&(values[5].f),&(values[6].f),&(values[7].f))<8)
+                {
+                    *error = BADFORMAT;
+                    return;
+                }
+                makeSegment(o->shapes+j,makePoint(values[0].f,values[1].f),makePoint(values[2].f,values[3].f),
+                            makeColor4f(values[4].f,values[6].f,values[6].f,values[7].f));
+                break;
+            default:
+                *error = BADFORMAT;
+                return;
+            }
+        }
+        readLine(strin,BUFSIZ,fp);
+        memset(strincmp,0,BUFSIZE/8);
+        if(sscanf(strin,"%s",strincmp)<1)
+        {
+            *error = BADFORMAT;
+            return;
+        }
+
+        if(strcmp(strincmp,"effets"))
+        {
+            *error = BADFORMAT;
+            return;
+        }
+        for (j=0; j<nbeffects; j++)
+        {
+            readLine(strin,BUFSIZ,fp);
+            if(sscanf(strin,"type:%c",&type)<1)
+            {
+                *error = BADFORMAT;
+                return;
+            }
+            switch (type) {
+            case 'p':
+                if(sscanf(strin+7,"valeur:%f",&(values[0].f))<1)
+                {
+                    *error = BADFORMAT;
+                    return;
+                }
+                e.points.ammount = values[0].f;
+                o->effectsTypesAtCollision[j] = POINTSMODIF;
+                break;
+            case 'a':
+                if(sscanf(strin+7,"delay:%d valeur:%f",&(values[0].i),&(values[1].f))<1)
+                {
+                    *error = BADFORMAT;
+                    return;
+                }
+                e.acceleration.acceleration_value = values[1].f;
+                o->effectsTypesAtCollision[j] = ACCELERATION;
+                o->effectDelays[j] = values[0].i;
+                break;
+            case 'r':
+                if(sscanf(strin+7,"resistance:%f rebond:%f",&(values[0].f),&(values[1].f))<1)
+                {
+                    *error = BADFORMAT;
+                    return;
+                }
+                e.rebound.resistance = values[0].f;
+                e.rebound.rebound_value = values[1].f;
+                o->effectDelays[j] = 2;
+                o->effectsTypesAtCollision[j] = REBOUND;
+                break;
+            default:
+                *error = BADFORMAT;
+                return;
+            }
+            o->effectsAtCollision[j] = e;
+        }
+        addObjectToMap(map,o,makePoint(o->x,o->y));
     }
-  }
+    *error = NOERROR;
 }
