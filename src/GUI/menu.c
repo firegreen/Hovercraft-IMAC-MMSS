@@ -63,11 +63,13 @@ Button makeButton(char *label, Bounds6F bounds, Color4f fore, Color4f back, void
 void privateDrawButton(const Button* b,const Color4f* fore, const Color4f* back){
     glColor4f(back->r,back->g,back->b,back->a);
     glBegin(GL_QUADS);
+
     glVertex2f(b->bounds.x1,b->bounds.y1);
     glVertex2f(b->bounds.x2,b->bounds.y1);
     glVertex2f(b->bounds.x2,b->bounds.y2);
     glVertex2f(b->bounds.x1,b->bounds.y2);
     glEnd();
+
     glColor4f(fore->r,fore->g,fore->b,fore->a);
     glBegin(GL_LINE_LOOP);
     glVertex2f(b->bounds.x1,b->bounds.y1);
