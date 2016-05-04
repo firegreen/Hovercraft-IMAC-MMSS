@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include "SDL_tools.h"
-#define SEAFILE "images/sea.jpg"
+#include "textures.h"
 
 #ifdef __APPLE__
 #include <SDL.h>
@@ -14,49 +14,18 @@
 #endif
 
 #define BUFSIZE 512
-#define IMAGEPATH "images/"
-#define readLine(strin, bufsize, fp) strin[0] = 0; fgets(strin,bufsize,fp); if(!strin[0]){ *error = EOFREACHED;}
+#define readLine(strin, bufsize, fp) strin[0] = 0; fgets(strin,bufsize,fp); if(!strin[0]){ *error = EOFREACHED; return;}
 
 char imagefile[100];
 
 void drawMap(const Map* map){
     glPushMatrix();
-    if(map->textureid){
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, map->textureid);
-
-        glBegin(GL_QUADS);
-
-        glColor3f(map->color.r, map->color.g, map->color.b);
-
-        glTexCoord2f(0, 0);
-        glVertex2f(map->bounds.leftTop.x, map->bounds.leftTop.y);
-
-        glTexCoord2f(0, 1);
-        glVertex2f(map->bounds.leftBottom.x, map->bounds.leftBottom.y);
-
-        glTexCoord2f(1, 1);
-        glVertex2f(map->bounds.rightBottom.x, map->bounds.rightBottom.y);
-
-        glTexCoord2f(1, 0);
-        glVertex2f(map->bounds.rightTop.x, map->bounds.rightTop.y);
-
-        glEnd();
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glDisable(GL_TEXTURE_2D);
+    int i = 0;
+    for(i=0;i<4;i++){
+        map->physicalBounds.shapes->texturesPoints[i].x += 0.0005;
+        map->physicalBounds.shapes->texturesPoints[i].y += 0.0005;
     }
-    else{
-        glBegin(GL_QUADS);
-
-        glColor3f(map->color.r,map->color.g,map->color.b);
-
-        glVertex2f(map->bounds.leftTop.x, map->bounds.leftTop.y);
-        glVertex2f(map->bounds.leftBottom.x, map->bounds.leftBottom.y);
-        glVertex2f(map->bounds.rightBottom.x, map->bounds.rightBottom.y);
-        glVertex2f(map->bounds.rightTop.x, map->bounds.rightTop.y);
-
-        glEnd();
-    }
+    drawObject(&map->physicalBounds);
     Chained_Object* current = map->objects;
     while(current!=NULL){
         drawObject(current->object);
@@ -75,6 +44,65 @@ void updateMap(Map *map){
     }
     map->color.g += map->color.g*map->Gcolorevolution;
     map->color.b += map->color.b*map->Bcolorevolution;
+    map->state +=0.001;
+    if(map->state>1) map->state = 0;
+    Chained_Object* co, *co2;
+    Chained_Object* coNext;
+    if(map->objects!=NULL){
+        co = map->objects;
+        while(co->next!=NULL){
+            co2 = co->next;
+            while(co2!=NULL){
+                handleCollision(co->object,co2->object);
+                co2 = co2->next;
+            }
+            if(co->next->object->life > 0){
+                updateObject(co->next->object);
+                applyFrottement(map,co->next->object);
+            }
+            else{
+                coNext = co->next->next;
+                free(co->next);
+                co->next = coNext;
+            }
+            co = co->next;
+        }
+        co2 = map->objects->next;
+        while(co2!=NULL){
+            handleCollision(map->objects->object,co2->object);
+            co2 = co2->next;
+        }
+        if(map->objects->object->life > 0){
+            updateObject(map->objects->object);
+        }
+        else{
+            coNext = map->objects->next;
+            free(map->objects);
+            map->objects = coNext;
+        }
+        applyFrottement(map,map->objects->object);
+    }
+    int i = 0;
+    map->itemState += (float)rand()/(float)RAND_MAX+EPSILON;
+    float inc = 1./(float)map->nbItems;
+    for(;i<map->nbItems;i++){
+        if((map->potentialItem[i].freq+inc)>map->itemState && map->itemState>inc){
+            float x = (float)(rand()%(int)(map->bounds.rightBottom.x-map->bounds.leftBottom.x))
+                    + map->bounds.leftBottom.x;
+            float y = (float)(rand()%(int)(map->bounds.leftTop.y-map->bounds.rightBottom.y))
+                    + map->bounds.leftBottom.y;
+            Object* newO = malloc(sizeof(Object));
+            cpyObject(newO,&map->potentialItem[i].object);
+            newO->x = x;
+            newO->y = y;
+            addObjectToMap(map,newO,makePoint(newO->x,newO->y));
+            break;
+        }
+        inc+=inc;
+    }
+    if(map->itemState>1){
+        map->itemState = 0;
+    }
 }
 
 void applyFrottement(const Map *map, Object *o){
@@ -82,7 +110,7 @@ void applyFrottement(const Map *map, Object *o){
     o->vy -= o->vy * map->frottement;
 }
 
-void initMap(Map* map, float width, float height, float frottement, const char* file_name){
+void initMap(Map* map, float width, float height, float frottement, int textureID){
     map->bounds = makeBounds4P(-width/2.,height/2.,width/2.,-height/2.);
     map->height = height;
     map->width = width;
@@ -91,16 +119,13 @@ void initMap(Map* map, float width, float height, float frottement, const char* 
     map->color = makeColor3f(1,1,1);
     map->Bcolorevolution = -0.003;
     map->Gcolorevolution = -0.0002;
-    SDL_Surface* image = IMG_Load(file_name);
-    if(image == NULL) {
-        fprintf(stderr, "Impossible de charger l'image %s\n", file_name);
-    }
-    else{
-        glGenTextures(1, &map->textureid);
-        makeTexture(map->textureid,file_name,GL_RGB);
-    }
     makeObject(&(map->physicalBounds),1,1,100,2000,1,0,1);
-    makeInversedRectangle(map->physicalBounds.shapes,-width/2.,height/2.,width,height,makeColor4f(1,1,1,1),0);
+    float ratioX = 2*window.width/(window.orthoGLX*2);
+    float ratioY = 2*window.height/(window.orthoGLY*2);
+    makeInversedRectangleWithTexture(map->physicalBounds.shapes,-width/2.,height/2.,width,height,
+                                     makeColor4f(1,1,1,1),getTexture(textureID),
+                                     getTextureWidth(textureID)/ratioX,
+                                     getTextureHeight(textureID)/ratioY);
     Effect e;
     e.rebound.resistance = 1000;
     e.rebound.rebound_value = 0.75;
@@ -108,6 +133,18 @@ void initMap(Map* map, float width, float height, float frottement, const char* 
     map->physicalBounds.effectsAtCollision[0]=e;
     map->physicalBounds.effectsTypesAtCollision[0]=REBOUND;
     map->objects = makeChainedObject(&(map->physicalBounds),NULL,makePoint(0,0));
+    map->state=0;
+    map->itemState = 0;
+}
+
+void initMapItems(Map* map, int nbItems){
+    map->nbItems = nbItems;
+    map->potentialItem = malloc(sizeof(Item) * nbItems);
+}
+
+void setItem(Map *map, Item item, int indice){
+    if(indice>=0 && indice<map->nbItems)
+        map->potentialItem[indice] = item;
 }
 
 void addObjectToMap(Map *map, struct Object *o, Point2D position){
@@ -124,28 +161,30 @@ void addObjectToMap(Map *map, struct Object *o, Point2D position){
     current->next = makeChainedObject(o,NULL,position);
 }
 
-typedef union readValues {
-  float f;
-  int i;
-  char c;
-} readValues;
-
 void readFile(Map* map, char* path, int* error)
 {
-    int i,j;
-    char texture[BUFSIZE/8];
-    char type;
-    float frottement, width, height;
-    int nbre_obstacles, nbre_formes, nbeffects;
-    float life, colliderRadius, strength;
+    int i,j,k,iTex;
+    int textureID;
+    int nbObstacles, nbShapes, nbEffects, nbPoints, nbTexPoints, nbItems;
+    int full;
+    float frottement, freq;
+    float life, radius, strength;
     int isStatic, isUnbreakable;
-    Point2D pos;
-    readValues values[10];
+    char type;
+    Point2D pos,pos2;
+    TexturePoint2D texpos;
+    Point2D size;
+    Color4f color;
     char strin[BUFSIZE];
     char strincmp[BUFSIZE/8];
     Object* o;
+    Item item;
     Effect e;
     FILE* fp;
+    float ratioX = 2*window.width/(window.orthoGLX*2);
+    float ratioY = 2*window.height/(window.orthoGLY*2);
+    *error = NOERROR;
+
     if(path == NULL)
     {
         *error = FILENOTEXIST;
@@ -157,108 +196,150 @@ void readFile(Map* map, char* path, int* error)
         *error = FILENOTEXIST;
         return;
     }
-    readLine(strin,BUFSIZE,fp);
-    memset(texture,0,BUFSIZE/8);
-    if(sscanf(strin, "texture:\"%[^\t\n\"]\" frottement:%f largeur:%f hauteur:%f",&texture,&frottement,&width,&height)<4){
-        *error = BADFORMAT;
-        return;
-    }
-    initMap(map, width, height, frottement, texture);
 
     readLine(strin,BUFSIZE,fp);
-    if(sscanf(strin, "nbobstacles:%d", &nbre_obstacles)<1)
-    {
-        *error = BADFORMAT;
+    if(sscanf(strin, "texture:%d frottement:%f largeur:%f hauteur:%f",
+              &textureID,&frottement,&size.x,&size.y)<4){
+        *error = BADFORMATMAP;
         return;
     }
+    initMap(map, size.x, size.y, frottement, textureID);
+    readLine(strin,BUFSIZE,fp);
+    if(sscanf(strin, "nbobstacles:%d nbitems:%d", &nbObstacles, &nbItems)<2)
+    {
+        *error = BADFORMATMAP;
+        return;
+    }
+
     readLine(strin,BUFSIZ,fp);
     memset(strincmp,0,BUFSIZE/8);
     if(sscanf(strin,"%s",strincmp)<1)
     {
-        *error = BADFORMAT;
+        *error = BADFORMATMAP;
         return;
     }
     if(strcmp(strincmp,"obstacles"))
     {
-        *error = BADFORMAT;
+        *error = BADFORMATMAP;
         return;
     }
-    for (i=0; i<nbre_obstacles; i++)
+
+    for (i=0; i<nbObstacles; i++)
     {
         readLine(strin,BUFSIZ,fp);
         if(sscanf(strin, "nbformes:%d nbeffets:%d vie:%f rayoncolision:%f statique:%d force:%f incassable:%d position:(%f,%f)",
-                         &nbre_formes, &nbeffects, &life, &colliderRadius, &isStatic, &strength, &isUnbreakable,
-                  &pos.x,&pos.y)<9)
+                         &nbShapes, &nbEffects, &life, &radius, &isStatic, &strength, &isUnbreakable,
+                         &pos.x,&pos.y)<9)
         {
-            *error = BADFORMAT;
+            *error = BADFORMATOBJECT;
             return;
         }
         o = malloc(sizeof(Object));
-        makeObject(o,nbeffects,nbre_formes,life,colliderRadius,isStatic,strength,isUnbreakable);
+        makeObject(o,nbEffects,nbShapes,life,radius,isStatic,strength,isUnbreakable);
         o->x = pos.x; o->y = pos.y;
         readLine(strin,BUFSIZ,fp);
         memset(strincmp,0,BUFSIZE/8);
         if(sscanf(strin,"%s",strincmp)<1)
         {
-            *error = BADFORMAT;
+            *error = BADFORMATOBJECT;
             return;
         }
         if(strcmp(strincmp,"formes"))
         {
-            *error = BADFORMAT;
+            *error = BADFORMATOBJECT;
             return;
         }
-        for (j=0; j<nbre_formes; j++)
+        for (j=0; j<nbShapes; j++)
         {
+            memset(strincmp,0,BUFSIZE/8);
             readLine(strin,BUFSIZ,fp);
+            textureID = 0;
             if(sscanf(strin,"type:%c",&type)<1)
             {
-                *error = BADFORMAT;
+                *error = BADFORMATSHAPE;
                 return;
             }
             switch (type) {
             case 'c':
-                if(sscanf(strin+7,"rayon:%f centre:(%f,%f) couleur:(%f,%f,%f,%f) rempli:%d",
-                          &(values[0].f),&(values[1].f),&(values[2].f),&(values[3].f),
-                          &(values[4].f),&(values[5].f),&(values[6].f),&(values[7].i))<8)
+                if(sscanf(strin+7,"rayon:%f centre:(%f,%f) couleur:(%f,%f,%f,%f) rempli:%d texture:%d",
+                          &radius,&pos.x,&pos.y,&color.r,&color.g,&color.b,&color.a,&full,&textureID)<8)
                 {
-                    *error = BADFORMAT;
+                    *error = BADFORMATSHAPE;
                     return;
                 }
-                makeCircle(o->shapes+j,values[0].f,makePoint(values[1].f,values[2].f),
-                        makeColor4f(values[3].f,values[4].f,values[5].f,values[6].f),values[7].i);
+                if(textureID==0)
+                    makeCircle(o->shapes+j,radius,pos,color,full);
+                else
+                    makeCircleWithTexture(o->shapes+j,radius,pos,color,
+                                          getTexture(textureID), getTextureWidth(textureID)/ratioX,
+                                          getTextureHeight(textureID)/ratioY);
                 break;
-            case 'p':
-                if(sscanf(strin+7,"nbpoints:%d couleur:(%f,%f,%f,%f) rempli:%d",
-                          &(values[0].i),&(values[1].f),&(values[2].f),&(values[3].f),&(values[4].f),&(values[5].i))<6)
+            case 'r':
+                if(sscanf(strin+7,"topleft:(%f,%f) size:(%f,%f) couleur:(%f,%f,%f,%f) rempli:%d texture:%d",
+                          &(pos.x),&(pos.y),&(size.x),&(size.y),&(color.r),&(color.g),&(color.b),&(color.a),
+                          &full,&textureID)<9)
                 {
-                    *error = BADFORMAT;
+                    *error = BADFORMATSHAPE;
                     return;
                 }
-                makePolygon(o->shapes+j,values[0].i,makeColor4f(values[1].f,values[2].f,values[3].f,values[4].f),values[5].i);
-                for(j=0; j<values[0].i; j++){
+                if(textureID==0)
+                    makeRectangle(o->shapes+j,pos.x,pos.y,size.x,size.y,color,full);
+                else
+                    makeRectangleWithTexture(o->shapes+j,pos.x,pos.y,size.x,size.y,color,
+                                            getTexture(textureID), getTextureWidth(textureID)/ratioX,
+                                            getTextureHeight(textureID)/ratioY,1);
+
+              break;
+            case 'p':
+                if(sscanf(strin+7,"nbpoints:%d couleur:(%f,%f,%f,%f) rempli:%d texture:%d nbtexpoints:%d",
+                          &nbPoints,&color.r,&color.g,&color.b,&color.a,&full,&textureID,&nbTexPoints)<6)
+                {
+                    *error = BADFORMATSHAPE;
+                    return;
+                }
+                if(textureID==0)
+                    makePolygon(o->shapes+j,nbPoints,color,full);
+                else
+                    makePolygonWithTexture(o->shapes+j,nbPoints,color,textureID,nbTexPoints);
+                readLine(strin,BUFSIZ,fp);
+                if(sscanf(strin,"%s",strincmp)<1)
+                {
+                    *error = BADFORMATMAP;
+                    return;
+                }
+                if(strcmp(strincmp,"points"))
+                {
+                    *error = BADFORMATMAP;
+                    return;
+                }
+                iTex=0;
+                for(k=0; k<o->shapes->spec.polygon.nbPoints; k++){
                    readLine(strin,BUFSIZ,fp);
-                   if(sscanf(strin,"(%f,%f)",&(values[0].f),&(values[1].f))<2)
+                   texpos.x=-1;
+                   if(sscanf(strin,"(%f,%f) (%f,%f)",&(pos.x),&(pos.y),&texpos.x,&texpos.y)<2)
                    {
-                       *error = BADFORMAT;
+                       *error = BADFORMATSHAPE;
                        return;
                    }
-                   setPolygonPoint(o->shapes+i,j,makePoint(values[0].f,values[1].f));
+                   setPolygonPoint(o->shapes+j,k,pos);
+                   if(texpos.x>=0){
+                       texpos.indice = k;
+                       setPolygonTexturePoint(o->shapes+j,iTex,texpos);
+                       iTex++;
+                   }
                 }
                 break;
             case 's':
                 if(sscanf(strin+7,"p1:(%f,%f) p2:(%f,%f) couleur:(%f,%f,%f,%f)",
-                          &(values[0].f),&(values[1].f),&(values[2].f),&(values[3].f),
-                          &(values[4].f),&(values[5].f),&(values[6].f),&(values[7].f))<8)
+                          &pos.x,&pos.y,&pos2.x,&pos2.y,&color.r,&color.g,&color.b,&color.a)<8)
                 {
-                    *error = BADFORMAT;
+                    *error = BADFORMATSHAPE;
                     return;
                 }
-                makeSegment(o->shapes+j,makePoint(values[0].f,values[1].f),makePoint(values[2].f,values[3].f),
-                            makeColor4f(values[4].f,values[6].f,values[6].f,values[7].f));
+                makeSegment(o->shapes+j,pos,pos2,color);
                 break;
             default:
-                *error = BADFORMAT;
+                *error = BADFORMATSHAPE;
                 return;
             }
         }
@@ -266,61 +347,240 @@ void readFile(Map* map, char* path, int* error)
         memset(strincmp,0,BUFSIZE/8);
         if(sscanf(strin,"%s",strincmp)<1)
         {
-            *error = BADFORMAT;
+            *error = BADFORMATOBJECT;
             return;
         }
-
         if(strcmp(strincmp,"effets"))
         {
-            *error = BADFORMAT;
+            *error = BADFORMATOBJECT;
             return;
         }
-        for (j=0; j<nbeffects; j++)
+        for (j=0; j<nbEffects; j++)
         {
             readLine(strin,BUFSIZ,fp);
             if(sscanf(strin,"type:%c",&type)<1)
             {
-                *error = BADFORMAT;
+                *error = BADFORMATEFFECT;
                 return;
             }
             switch (type) {
             case 'p':
-                if(sscanf(strin+7,"valeur:%f",&(values[0].f))<1)
+                if(sscanf(strin+7,"valeur:%d",&(e.points.ammount))<1)
                 {
-                    *error = BADFORMAT;
+                    *error = BADFORMATEFFECT;
                     return;
                 }
-                e.points.ammount = values[0].f;
                 o->effectsTypesAtCollision[j] = POINTSMODIF;
                 break;
             case 'a':
-                if(sscanf(strin+7,"delay:%d valeur:%f",&(values[0].i),&(values[1].f))<1)
+                if(sscanf(strin+7,"delay:%d valeur:%f",o->effectDelays + j,&(e.acceleration.acceleration_value))<1)
                 {
-                    *error = BADFORMAT;
+                    *error = BADFORMATEFFECT;
                     return;
                 }
-                e.acceleration.acceleration_value = values[1].f;
                 o->effectsTypesAtCollision[j] = ACCELERATION;
-                o->effectDelays[j] = values[0].i;
                 break;
             case 'r':
-                if(sscanf(strin+7,"resistance:%f rebond:%f",&(values[0].f),&(values[1].f))<1)
+                if(sscanf(strin+7,"resistance:%f rebond:%f",&(e.rebound.resistance),&(e.rebound.rebound_value))<1)
                 {
-                    *error = BADFORMAT;
+                    *error = BADFORMATEFFECT;
                     return;
                 }
-                e.rebound.resistance = values[0].f;
-                e.rebound.rebound_value = values[1].f;
                 o->effectDelays[j] = 2;
                 o->effectsTypesAtCollision[j] = REBOUND;
                 break;
             default:
-                *error = BADFORMAT;
+                *error = BADFORMATEFFECT;
                 return;
             }
             o->effectsAtCollision[j] = e;
         }
         addObjectToMap(map,o,makePoint(o->x,o->y));
     }
-    *error = NOERROR;
+    readLine(strin,BUFSIZ,fp);
+    memset(strincmp,0,BUFSIZE/8);
+    if(sscanf(strin,"%s",strincmp)<1)
+    {
+        *error = BADFORMATOBJECT;
+        return;
+    }
+    if(strcmp(strincmp,"items"))
+    {
+        *error = BADFORMATOBJECT;
+        return;
+    }
+    initMapItems(map,nbItems);
+    for (i=0; i<nbItems; i++)
+    {
+        readLine(strin,BUFSIZ,fp);
+        if(sscanf(strin, "nbformes:%d nbeffets:%d vie:%f rayoncolision:%f statique:%d force:%f incassable:%d freq:%f",
+                         &nbShapes, &nbEffects, &life, &radius, &isStatic, &strength, &isUnbreakable,&freq)<8)
+        {
+            *error = BADFORMATOBJECT;
+            return;
+        }
+        makeObject(&item.object,nbEffects,nbShapes,life,radius,isStatic,strength,isUnbreakable);
+        item.freq = freq;
+        readLine(strin,BUFSIZ,fp);
+        memset(strincmp,0,BUFSIZE/8);
+        if(sscanf(strin,"%s",strincmp)<1)
+        {
+            *error = BADFORMATOBJECT;
+            return;
+        }
+        if(strcmp(strincmp,"formes"))
+        {
+            *error = BADFORMATOBJECT;
+            return;
+        }
+        for (j=0; j<nbShapes; j++)
+        {
+            memset(strincmp,0,BUFSIZE/8);
+            readLine(strin,BUFSIZ,fp);
+            textureID = 0;
+            if(sscanf(strin,"type:%c",&type)<1)
+            {
+                *error = BADFORMATSHAPE;
+                return;
+            }
+            switch (type) {
+            case 'c':
+                if(sscanf(strin+7,"rayon:%f centre:(%f,%f) couleur:(%f,%f,%f,%f) rempli:%d texture:%d",
+                          &radius,&pos.x,&pos.y,&color.r,&color.g,&color.b,&color.a,&full,&textureID)<8)
+                {
+                    *error = BADFORMATSHAPE;
+                    return;
+                }
+                if(textureID==0)
+                    makeCircle(item.object.shapes+j,radius,pos,color,full);
+                else
+                    makeCircleWithTexture(item.object.shapes+j,radius,pos,color,
+                                          getTexture(textureID), getTextureWidth(textureID)/ratioX,
+                                          getTextureHeight(textureID)/ratioY);
+                break;
+            case 'r':
+                if(sscanf(strin+7,"topleft:(%f,%f) size:(%f,%f) couleur:(%f,%f,%f,%f) rempli:%d texture:%d",
+                          &(pos.x),&(pos.y),&(size.x),&(size.y),&(color.r),&(color.g),&(color.b),&(color.a),
+                          &full,&textureID)<9)
+                {
+                    *error = BADFORMATSHAPE;
+                    return;
+                }
+                if(textureID==0)
+                    makeRectangle(item.object.shapes+j,pos.x,pos.y,size.x,size.y,color,full);
+                else{
+                    makeRectangleWithTexture(item.object.shapes+j,pos.x,pos.y,size.x,size.y,color,
+                                            getTexture(textureID), getTextureWidth(textureID)/ratioX,
+                                            getTextureHeight(textureID)/ratioY,0);
+                }
+
+              break;
+            case 'p':
+                if(sscanf(strin+7,"nbpoints:%d couleur:(%f,%f,%f,%f) rempli:%d texture:%d nbtexpoints:%d",
+                          &nbPoints,&color.r,&color.g,&color.b,&color.a,&full,&textureID,&nbTexPoints)<6)
+                {
+                    *error = BADFORMATSHAPE;
+                    return;
+                }
+                if(textureID==0)
+                    makePolygon(item.object.shapes+j,nbPoints,color,full);
+                else
+                    makePolygonWithTexture(item.object.shapes+j,nbPoints,color,textureID,nbTexPoints);
+                readLine(strin,BUFSIZ,fp);
+                if(sscanf(strin,"%s",strincmp)<1)
+                {
+                    *error = BADFORMATMAP;
+                    return;
+                }
+                if(strcmp(strincmp,"points"))
+                {
+                    *error = BADFORMATMAP;
+                    return;
+                }
+                iTex=0;
+                for(k=0; k<item.object.shapes->spec.polygon.nbPoints; k++){
+                   readLine(strin,BUFSIZ,fp);
+                   texpos.x=-1;
+                   if(sscanf(strin,"(%f,%f) (%f,%f)",&(pos.x),&(pos.y),&texpos.x,&texpos.y)<2)
+                   {
+                       *error = BADFORMATSHAPE;
+                       return;
+                   }
+                   setPolygonPoint(item.object.shapes+j,k,pos);
+                   if(texpos.x>=0){
+                       texpos.indice = k;
+                       setPolygonTexturePoint(item.object.shapes+j,iTex,texpos);
+                       iTex++;
+                   }
+                }
+                break;
+            case 's':
+                if(sscanf(strin+7,"p1:(%f,%f) p2:(%f,%f) couleur:(%f,%f,%f,%f)",
+                          &pos.x,&pos.y,&pos2.x,&pos2.y,&color.r,&color.g,&color.b,&color.a)<8)
+                {
+                    *error = BADFORMATSHAPE;
+                    return;
+                }
+                makeSegment(item.object.shapes+j,pos,pos2,color);
+                break;
+            default:
+                *error = BADFORMATSHAPE;
+                return;
+            }
+        }
+        readLine(strin,BUFSIZ,fp);
+        memset(strincmp,0,BUFSIZE/8);
+        if(sscanf(strin,"%s",strincmp)<1)
+        {
+            *error = BADFORMATOBJECT;
+            return;
+        }
+        if(strcmp(strincmp,"effets"))
+        {
+            *error = BADFORMATOBJECT;
+            return;
+        }
+        for (j=0; j<nbEffects; j++)
+        {
+            readLine(strin,BUFSIZ,fp);
+            if(sscanf(strin,"type:%c",&type)<1)
+            {
+                *error = BADFORMATEFFECT;
+                return;
+            }
+            switch (type) {
+            case 'p':
+                if(sscanf(strin+7,"valeur:%d",&(e.points.ammount))<1)
+                {
+                    *error = BADFORMATEFFECT;
+                    return;
+                }
+                item.object.effectsTypesAtCollision[j] = POINTSMODIF;
+                break;
+            case 'a':
+                if(sscanf(strin+7,"delay:%d valeur:%f",item.object.effectDelays + j,&(e.acceleration.acceleration_value))<1)
+                {
+                    *error = BADFORMATEFFECT;
+                    return;
+                }
+                item.object.effectsTypesAtCollision[j] = ACCELERATION;
+                break;
+            case 'r':
+                if(sscanf(strin+7,"resistance:%f rebond:%f",&(e.rebound.resistance),&(e.rebound.rebound_value))<1)
+                {
+                    *error = BADFORMATEFFECT;
+                    return;
+                }
+                item.object.effectDelays[j] = 2;
+                item.object.effectsTypesAtCollision[j] = REBOUND;
+                break;
+            default:
+                *error = BADFORMATEFFECT;
+                return;
+            }
+            item.object.effectsAtCollision[j] = e;
+        }
+        setItem(map,item,i);
+    }
 }
+

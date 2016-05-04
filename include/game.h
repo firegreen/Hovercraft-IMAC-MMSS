@@ -12,16 +12,11 @@
 #include "GUI/menu.h"
 
 Level levels[NBLEVELS];
-typedef enum { MAINAUDIO1=0,MAINAUDIO2,MAINAUDIO3,ACCAUDIO,COLISIONAUDIO, NBAUDIOS} AudioID;
-typedef enum { ONETEXTURE=0, TWOTEXTURE, THREETEXTURE, NBTEXTURES} TextureID;
+typedef enum { MAINAUDIO1=0, MAINAUDIO2,MAINAUDIO3,ACCAUDIO,COLISIONAUDIO, NBAUDIOS} AudioID;
 
 typedef union ModeStruct {
     Level level;
-<<<<<<< HEAD
-    //caMenu menu;
-=======
     Menu menu;
->>>>>>> master
 } ModeStruct;
 
 struct Game{
@@ -33,7 +28,6 @@ struct Game{
   unsigned char modeIsUnlocked[NBMODE];
   Camera currentCamera;
   int audioIDs[NBAUDIOS];
-  GLuint textureIDs[NBTEXTURES];
   Joystick joysticks[NBJOYSTICK];
   float specialState;
   unsigned char specialMode;

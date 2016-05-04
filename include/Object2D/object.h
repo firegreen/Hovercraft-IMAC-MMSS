@@ -18,7 +18,7 @@ typedef enum SHAPE_TYPE {POLYGON, SEGMENT, CIRCLE} SHAPE_TYPE;
 
 
 typedef union Effect {
-  struct { float ammount; } points;
+  struct { int ammount; } points;
   struct { float acceleration_value;} acceleration;
   struct { float resistance; float rebound_value;} rebound;
   struct { float force_value;} force;
@@ -35,6 +35,9 @@ typedef struct Shape{
     } spec;
     Color4f color;
     SHAPE_TYPE type;
+    GLuint textureID;
+    unsigned int nbTexturePoints;
+    TexturePoint2D* texturesPoints;
 } Shape;
 
 typedef struct Modification{
@@ -74,22 +77,37 @@ typedef struct Object{
 struct Hovercraft;
 
 void makePolygon(Shape* shape, unsigned int nbPoints, Color4f color, int full);
+void makePolygonWithTexture(Shape* shape, unsigned int nbPoints, Color4f color,
+                            GLuint textureID, unsigned int nbTexPoints);
 void setPolygonPoint(Shape* shape, int pointIndice, Point2D p);
-void makeRectangle(Shape* shape, float x, float y, float width, float height, Color4f color, int full);
-void makeInversedRectangle(Shape* shape, float x, float y, float width, float height, Color4f color, int full);
+void setPolygonTexturePoint(Shape* shape, int pointIndice, TexturePoint2D p);
+void makeRectangle(Shape* shape, float x, float y, float width,
+                   float height, Color4f color, int full);
+void makeRectangleWithTexture(Shape *shape, float x, float y, float width, float height,
+                              Color4f color, GLuint textureID, float texWidth, float texHeight, char realsize);
+void makeInversedRectangle(Shape* shape, float x, float y, float width, float height,
+                           Color4f color, int full);
+void makeInversedRectangleWithTexture(Shape* shape, float x, float y, float width, float height,
+                           Color4f color, GLuint textureID, float texWidth, float texHeight);
 void makeCircle(Shape* shape, float r, Point2D c, Color4f color, int full);
+void makeCircleWithTexture(Shape* shape, float r, Point2D c, Color4f color,
+                           GLuint textureID, float textureWidth, float textureHeight);
 void makeSegment(Shape* shape, Point2D p1, Point2D p2, Color4f color);
-void setModifications(EFFECT_TYPE type, Effect effect, int delay, Intersection intersect, Object* o);
+void cpyShape(Shape* s1, const Shape* s2);
+void setModifications(Object* sender, Object *reveiver, EFFECT_TYPE type, Effect effect, int delay, Intersection intersect);
+void removeModifications(Object *object, Modification **modif);
 void makeObject(Object* o, int nbEffect, int nbShape, float life, float colliderRadius,
                 unsigned char isStatic, float strenth, unsigned char isUnbreakable);
+void cpyObject(Object* o1, const Object* o2);
 void drawShape(const Shape* shape);
-void drawShapeWithTexture(const Shape* shape, const Point2D* texturesPoints, GLuint textureId);
+void drawShapeWithTexture(const Shape* shape);
 void drawObject(const Object* object);
 void updateObject(Object* object);
 
 int handleCollision(Object* o1, Object* o2);
+int collisionBetweenLineAndObject(Line l, const Object* o2, Intersection* intersect);
 int collisionBetweenObject(const Object* o1, const Object* o2, Intersection* intersect);
-int collisionBetweenShapes(const Shape* shape1, Point2D p1, float angle1,
+int collisionBetweenShapes(const Shape* shape1, Point2D p1, float angle1, Vector2D direction1,
                            const Shape* shape2, Point2D p2, float angle2,
                            Intersection* intersect);
 

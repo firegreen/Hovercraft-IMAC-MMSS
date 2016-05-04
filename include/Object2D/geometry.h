@@ -8,15 +8,21 @@
 
 
 typedef struct Point2D {
-  float x;
-  float y;
+    float x;
+    float y;
 } Point2D;
+
+typedef struct TexturePoint2D {
+    int indice;
+    float x;
+    float y;
+} TexturePoint2D;
 
 typedef Point2D Vector2D;
 
 typedef struct Bounds4F{
-  float x,y;
-  float width,height;
+    float x,y;
+    float width,height;
 } Bounds4F;
 
 typedef struct Bounds6F{
@@ -25,15 +31,15 @@ typedef struct Bounds6F{
 }Bounds6F;
 
 typedef struct Bounds2P{
-  Point2D leftTop;
-  Point2D rightBottom;
+    Point2D leftTop;
+    Point2D rightBottom;
 } Bounds2P;
 
 typedef struct Bounds4P{
-  Point2D leftTop;
-  Point2D rightBottom;
-  Point2D leftBottom;
-  Point2D rightTop;
+    Point2D leftTop;
+    Point2D rightBottom;
+    Point2D leftBottom;
+    Point2D rightTop;
 } Bounds4P;
 
 typedef struct Intersection{
@@ -55,14 +61,10 @@ Vector2D normalizedVector(Vector2D v);
 void normalizeVector(Vector2D* v);
 Vector2D makeVectorAB(Point2D A, Point2D B);
 Point2D makeTranslateAndRotate(Point2D p, float tx, float ty, float angle);
-<<<<<<< HEAD
 Bounds4P makeBounds4P(float x1, float y1, float x2, float y2);
 Bounds2P makeBounds2P(float x1, float y1, float x2, float y2);
 Line makeLine(Point2D start, Point2D end);
-=======
-Bounds4P makeBounds4P(float x1, float y1, float width, float height);
 Bounds6F makeBounds6F(float x1, float y1, float width, float height);
-Segment makeLine(Point2D start, Point2D end);
->>>>>>> master
+
 
 #endif //GEOMETRY_H

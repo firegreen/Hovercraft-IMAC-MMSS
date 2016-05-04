@@ -14,7 +14,6 @@
 #define BITS_PER_PIXEL 32
 #define MILLISECOND_PER_FRAME 1000 / 60
 #define GLREPERE 100.
-#define NBAUDIOMAX 10
 #define GL_BRG 0x80E
 #define GL_BRGA 0x801
 
@@ -28,37 +27,9 @@ struct {
   float orthoGLY;
 } window;
 
-struct {
-    SDL_AudioSpec initialConfig;
-    SDL_AudioSpec currentConfig;
-} audioSpec;
-
-typedef struct {
-
-    SDL_AudioSpec spec;
-    SDL_AudioCVT  audioConverter;
-
-    Uint8 * sounddata;
-    Uint32 soundlength;
-    Uint32 soundpos;
-
-    unsigned char play;
-    unsigned char repeat;
-    float currentVolume,maxVolume;
-    float fadeIn,fadeOut;
-} Audio;
-
 void resize_handler(float width, float height);
 void reloadGLrepere();
 void initialize_window(float width, float height, unsigned char fullscreen);
-void initialize_audio(Uint16 format, int freq, Uint8 channels, Uint16 samples);
-void makeTexture(GLuint id, const char *filename, GLint textureFormat);
-void drawTextureQuad(GLuint id, const Color4f *c, const Bounds2P *b);
-int makeAudio(const char* filename, unsigned char repeat, float volume);
-void playAudio(int id);
-void stopAudio(int id);
-void playAudioFadeIn(int id, float fadeValue);
-void stopAudioFadeOut(int id, float fadeValue);
 int windowEventHandler(const SDL_Event* event);
 
 
