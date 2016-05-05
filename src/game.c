@@ -104,18 +104,18 @@ void drawGame()
                 drawLevel(&(Game.currentModeStruct->level));
             break;
         case MODE_ONEPLAYER :
-            //initOnePlayer(&(Game.currentModeStruct->oneplayer),"images/instructions.png", 4);
+            initOnePlayer(&(Game.currentModeStruct->oneplayer),"images/instructions.png", 4);
             drawOnePlayer(&(Game.currentModeStruct->oneplayer));
             break;
         case MODE_TWOPLAYERS :
-            //initTwoPlayers(&(Game.currentModeStruct->twoplayers),"images/instructions.png", 4);
+            initTwoPlayers(&(Game.currentModeStruct->twoplayers),"images/instructions.png", 4);
             drawTwoPlayers(&(Game.currentModeStruct->twoplayers));
             break;
         case MODE_INSTRUCTIONS :
             drawInstructions(&(Game.currentModeStruct->instruction));
             break;
         case MODE_CREDITS :
-            //initCredits(&(Game.currentModeStruct->credit),"images/credits.png");
+            initCredits(&(Game.currentModeStruct->credit),"images/credits.png");
             drawCredits(&(Game.currentModeStruct->credit));
             break;
         default :
@@ -169,7 +169,7 @@ int handleEvent(const SDL_Event* event)
         handleEventLevel(&(Game.currentModeStruct->level),event);
         break;
     case MODE_MAINMENU:
-        //handleEventMenu(&(Game.currentModeStruct->menu), event);
+         handleEventMenu(&(Game.currentModeStruct->menu), event);
         break;
     case MODE_INSTRUCTIONS:
          handleEventGoBack(Game.currentModeStruct->instruction.retour, event);
@@ -207,7 +207,7 @@ void initializeGame()
     loadConfig();
     initialize_window(Game.windowWidth,Game.windowHeight,Game.fullscreen);
     initGameAudio();
-    initGameTextures();
+    initTextures();
     initControls();
     int i = 0;
     int max =SDL_NumJoysticks()>NBJOYSTICK?NBJOYSTICK:SDL_NumJoysticks();
@@ -223,8 +223,6 @@ void initializeGame()
     Game.specialState = 0;
     Game.transitionMode = 0;
 }
-
-
 
 void game()
 {

@@ -14,7 +14,7 @@
 #include "quadTree.h"
 
 typedef enum READERROR { EOFREACHED, BADFORMATMAP,BADFORMATOBJECT, BADFORMATSHAPE, BADFORMATEFFECT,
-                         FILENOTEXIST, NOERROR } ReadError;
+                         FILENOTEXIST, NONEERROR } ReadError;
 
 typedef struct Item {
     Object object;

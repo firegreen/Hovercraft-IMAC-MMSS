@@ -35,7 +35,7 @@ void initTextures(){
     for(i=0;i<nbTextures;i++){
         readLine(strin,BUFSIZE,fp);
         memset(texture,0,BUFSIZE/8);
-        if(sscanf(strin, "\"%[^\t\n\"]\"",&texture)==1){
+        if(sscanf(strin, "\"%[^\t\n\"]\"",texture)==1){
             makeTexture(texturesIDs[i],texture,&(width),&(height));
             texturesSize[i].x=width;
             texturesSize[i].y=height;

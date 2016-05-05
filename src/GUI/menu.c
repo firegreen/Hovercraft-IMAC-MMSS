@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "
+#include "textures.h"
 #include "game.h"
 
 const Color4f BLACK = {0,0,0,1};
@@ -131,7 +131,8 @@ void drawButton(Button* b){
 ***********************************/
 void initMenu(Menu* m, const char* filename, int nbButtons){
     glGenTextures(1,&m->titleTextureID);
-    makeTexture(m->titleTextureID,filename,GL_RGBA);
+    int width,height;
+    makeTexture(m->titleTextureID,filename,&width,&height);
     m->buttons = malloc(sizeof(Button)*nbButtons);
 }
 
@@ -184,7 +185,8 @@ void handleEventMenu(Menu *m, const SDL_Event *event){
 
 void initOnePlayer(OnePlayer* op, const char* filename, int nbButtons){
     glGenTextures(1,&op->titleTextureID);
-    makeTexture(op->titleTextureID,filename,GL_RGBA);
+    int width,height;
+    makeTexture(op->titleTextureID,filename,&width,&height);
     op->buttons = malloc(sizeof(Button)*nbButtons);
     op->buttons[LEVEL1]= makeButton("Niveau 1",makeBounds6F(-40.0,0.0,80.0,13.0),BTNFORE,BTNPBACK,NULL);
     op->buttons[LEVEL2]= makeButton("Niveau 2",makeBounds6F(-40.0,-14.0,80.0,13.0),BTNFORE,BTNPBACK,NULL);
@@ -215,7 +217,8 @@ void drawOnePlayer(const OnePlayer* op){
 
 void initTwoPlayers(TwoPlayers* tp, const char* filename, int nbButtons){
     glGenTextures(1,&tp->titleTextureID);
-    makeTexture(tp->titleTextureID,filename,GL_RGBA);
+    int width,height;
+    makeTexture(tp->titleTextureID,filename,&width,&height);
     tp->buttons = malloc(sizeof(Button)*nbButtons);
     tp->buttons[LEVEL1]= makeButton("Niveau 1",makeBounds6F(-40.0,0.0,80.0,13.0),BTNFORE,BTNPBACK,NULL);
     tp->buttons[LEVEL2]= makeButton("Niveau 2",makeBounds6F(-40.0,-14.0,80.0,13.0),BTNFORE,BTNPBACK,NULL);
@@ -249,7 +252,8 @@ void drawTwoPlayers(const TwoPlayers* tp){
 
 void initInstructions(Instruction* i, const char* filename) {
     glGenTextures(1,&i->titleTextureID);
-    makeTexture(i->titleTextureID,filename,GL_RGBA);
+    int width,height;
+    makeTexture(i->titleTextureID,filename,&width,&height);
     i->retour = malloc(sizeof(Button));
     i->retour[0]= makeButton("Retour",makeBounds6F(-40.0,0.0,80.0,13.0),BTNFORE,BTNPBACK,goback);
 }
@@ -276,7 +280,8 @@ void drawInstructions(const Instruction* i) {
 
 void initCredits(Credits* c, const char* filename) {
     glGenTextures(1,&c->titleTextureID);
-    makeTexture(c->titleTextureID,filename,GL_RGBA);
+    int width,height;
+    makeTexture(c->titleTextureID,filename,&width,&height);
     c->retour = malloc(sizeof(Button));
     c->retour[0]= makeButton("Retour",makeBounds6F(-40.0,-50.0,30.0,13.0),BTNFORE,BTNPBACK,goback);
 }

@@ -183,7 +183,7 @@ void readFile(Map* map, char* path, int* error)
     FILE* fp;
     float ratioX = 2*window.width/(window.orthoGLX*2);
     float ratioY = 2*window.height/(window.orthoGLY*2);
-    *error = NOERROR;
+    *error = NONEERROR;
 
     if(path == NULL)
     {
