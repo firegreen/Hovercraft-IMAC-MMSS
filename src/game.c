@@ -1,4 +1,10 @@
 #include "game.h"
+#include "SDL_tools.h"
+#include "GUI/level.h"
+#include "textures.h"
+#include "audios.h"
+#include "Object2D/hovercraft.h"
+#include "GUI/menu.h"
 #include <stdlib.h>
 
 #ifdef __APPLE__
@@ -148,7 +154,7 @@ void update()
 int handleEvent(const SDL_Event* event)
 {
     if(event->type == SDL_QUIT) return 0;
-    /*if(event->type == SDL_KEYUP)
+    if(event->type == SDL_KEYUP)
     {
         if(event->key.keysym.sym == SDLK_F4)
             if(event->key.keysym.mod == KMOD_LALT || event->key.keysym.mod == KMOD_RALT)
@@ -157,7 +163,6 @@ int handleEvent(const SDL_Event* event)
             }
     }
     if(windowEventHandler(event)) return 1;
-    //if(handleJoystickEvent(Game.joysticks,event)) return 1;
     switch (Game.currentMode)
     {
     case MODE_LEVEL:
@@ -181,57 +186,42 @@ int handleEvent(const SDL_Event* event)
     default :
         break;
     }
-
-    return 1;*/
     return 1;
 }
 
-void initGameAudio()
-{
-    initialize_audio(AUDIO_S16SYS,22050,2,512);
-    Game.audioIDs[MAINAUDIO1] = makeAudio("sea_theme.wav",1,10);
-    Game.audioIDs[MAINAUDIO2] = makeAudio("stardust_theme.wav",0,150);
-    Game.audioIDs[ACCAUDIO] = makeAudio("hovercraft.wav",1,50);
-}
-
-void initGameTextures()
-{
-    glGenTextures(NBTEXTURES, Game.textureIDs);
-    makeTexture(Game.textureIDs[ONETEXTURE],"images/un.png",GL_RGBA);
-    makeTexture(Game.textureIDs[TWOTEXTURE],"images/deux.png",GL_RGBA);
-    makeTexture(Game.textureIDs[THREETEXTURE],"images/trois.png",GL_RGBA);
-
+void initGameAudio(){
+    initAudios(AUDIO_S16SYS,22050,2,512);
 }
 
 void initializeGame()
 {
-    /*char fakeParam[] = "fake";
+    char fakeParam[] = "fake";
     char *fakeargv[] = { fakeParam, NULL };
     int fakeargc = 1;
-    glutInit( &fakeargc, fakeargv);*/
+    glutInit( &fakeargc, fakeargv);
     Game.windowWidth = 640;
     Game.windowHeight = 480;
     Game.fullscreen = 0;
     Game.currentMode = MODE_MAINMENU;
     Game.currentModeStruct = malloc(sizeof(ModeStruct));
-    Game.specialMode = 0;
-    Game.specialState = 0;
-    Game.transitionMode = 0;
-
-    /*int i = 0;
+    loadConfig();
+    initialize_window(Game.windowWidth,Game.windowHeight,Game.fullscreen);
+    initGameAudio();
+    initGameTextures();
+    initControls();
+    int i = 0;
     int max =SDL_NumJoysticks()>NBJOYSTICK?NBJOYSTICK:SDL_NumJoysticks();
     for(; i<max; i++)
     {
         initJoystick(Game.joysticks+i,i);
-    }*/
-
-    loadConfig();
-    initialize_window(Game.windowWidth,Game.windowHeight,Game.fullscreen);
-    initMainMenu(&(Game.currentModeStruct->menu));
-    initGameAudio();
-    initGameTextures();
-    //playAudioFadeIn(Game.audioIDs[MAINAUDIO2],0.1);
+    }
+    playAudioFadeIn(3,0.1);
     SDL_PauseAudio(0);
+    initMainMenu(&(Game.currentModeStruct->menu));
+    //initLevel(&Game.currentModeStruct->level,2,2,0);
+    Game.specialMode = 0;
+    Game.specialState = 0;
+    Game.transitionMode = 0;
 }
 
 
@@ -247,11 +237,11 @@ void game()
         {
             loop = handleEvent(&event);
         }
-        //update();
+        update();
         glMatrixMode(GL_MODELVIEW);
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
-        //drawGame();
+        drawGame();
         SDL_GL_SwapBuffers();
         unsigned int delay = SDL_GetTicks() - startTime;
         if(delay < MILLISECOND_PER_FRAME)
@@ -259,6 +249,7 @@ void game()
             SDL_Delay(MILLISECOND_PER_FRAME - delay);
         }
     }
+
 }
 void loadConfig(){
 

@@ -13,7 +13,13 @@
 #include "Object2D/object.h"
 #include "quadTree.h"
 
-typedef enum READERROR { EOFREACHED, BADFORMAT, FILENOTEXIST, NONEERROR } ReadError;
+typedef enum READERROR { EOFREACHED, BADFORMATMAP,BADFORMATOBJECT, BADFORMATSHAPE, BADFORMATEFFECT,
+                         FILENOTEXIST, NOERROR } ReadError;
+
+typedef struct Item {
+    Object object;
+    float freq;
+} Item;
 
 typedef struct Map {
   float width, height;
@@ -25,11 +31,17 @@ typedef struct Map {
   float Bcolorevolution;
   float Gcolorevolution;
   float frottement;
-  GLuint textureid;
+  float state;
+  int nbItems;
+  Item* potentialItem;
+  Item specialItem;
+  float itemState;
 } Map;
 
-void initMap(Map *map, float width, float height, float frottement, const char* file_name);
+void initMap(Map *map, float width, float height, float frottement, int textureID);
+void initMapItems(Map *map, int nbItems);
 void addObjectToMap(Map *map, Object* o, Point2D position);
+void setItem(Map* map, Item item, int indice);
 void updateMap(Map *map);
 void applyFrottement(const Map* map, Object* o);
 void drawMap(const Map* map);

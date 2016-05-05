@@ -8,12 +8,13 @@ include/Object2D/geometry.h
 include/Object2D/hovercraft.h
 include/Object2D/object.h
 include/game.h
-include/image_src.h
+include/textures.h
 include/SDL_tools.h
 include/GUI/menu.h
 include/GUI/control.h
 src/GUI/level.c
 src/GUI/mode.c
+src/GUI/menu.c
 src/Mapping/camera.c
 src/Mapping/map.c
 src/Mapping/quadTree.c
@@ -22,11 +23,12 @@ src/Object2D/geometry.c
 src/Object2D/hovercraft.c
 src/Object2D/object.c
 src/game.c
-src/image_src.c
+src/textures.c
 src/main.c
 src/SDL_tools.c
 src/GUI/control.c
 Makefile
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 map1.txt
@@ -36,3 +38,9 @@ src/GUI/menu.c
 =======
 src/GUI/menu.c
 >>>>>>> menu
+=======
+map/1
+map/2
+include/audios.h
+src/audios.c
+>>>>>>> bbd7ce754856a5c5c4835ff8e713b1ff856884f8

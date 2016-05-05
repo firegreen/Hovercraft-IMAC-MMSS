@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "
 #include "game.h"
 
 const Color4f BLACK = {0,0,0,1};
@@ -77,6 +78,7 @@ Button makeButton(char *label, Bounds6F bounds, Color4f fore, Color4f back, void
 void privateDrawButton(const Button* b,const Color4f* fore, const Color4f* back){
 
     glColor4f(back->r,back->g,back->b,back->a);
+
     glBegin(GL_QUADS);
     glVertex2f(b->bounds.x1,b->bounds.y1);
     glVertex2f(b->bounds.x2,b->bounds.y1);
@@ -129,17 +131,17 @@ void drawButton(Button* b){
 ***********************************/
 void initMenu(Menu* m, const char* filename, int nbButtons){
     glGenTextures(1,&m->titleTextureID);
-    //makeTexture(m->titleTextureID,filename,GL_RGBA);
+    makeTexture(m->titleTextureID,filename,GL_RGBA);
     m->buttons = malloc(sizeof(Button)*nbButtons);
 }
 
 void initMainMenu(Menu* m){
     initMenu(m,"images/titre.png",MAINMENUNBBUTTONS);
-    /*m->buttons[ONEPLAYERS]= makeButton("1 Joueur",makeBounds6F(-40.0,0.0,80.0,13.0),BTNFORE,BTNPBACK,un_joueur);
+    m->buttons[ONEPLAYERS]= makeButton("1 Joueur",makeBounds6F(-40.0,0.0,80.0,13.0),BTNFORE,BTNPBACK,un_joueur);
     m->buttons[TWOPLAYERS]= makeButton("2 Joueurs",makeBounds6F(-40.0,-14.0,80.0,13.0),BTNFORE,BTNPBACK,deux_joueurs);
     m->buttons[INSTRUCTIONS]= makeButton("Instructions",makeBounds6F(-40.0,-28.0,80.0,13.0),BTNFORE,BTNPBACK,instructions);
     m->buttons[CREDITS]= makeButton("Credits",makeBounds6F(-40.0,-42.0,80.0,13.0),BTNFORE,BTNPBACK,credits);
-    m->buttons[EXIT_GAME]= makeButton("Quitter",makeBounds6F(-40.0,-56.0,80.0,13.0),BTNFORE,BTNPBACK,quitter);*/
+    m->buttons[EXIT_GAME]= makeButton("Quitter",makeBounds6F(-40.0,-56.0,80.0,13.0),BTNFORE,BTNPBACK,quitter);
 }
 
 
@@ -153,15 +155,15 @@ void drawMenu(const Menu* m){
         glVertex2f(window.width,window.height);
         glVertex2f(-window.width,window.height);
     glEnd();
-    /*for(i=0;i<MAINMENUNBBUTTONS;i++){
+    for(i=0;i<MAINMENUNBBUTTONS;i++){
         drawButton(&(m->buttons[i]));
-    }*/
+    }
     Bounds2P b = makeBounds2P(-50,50,60,20);
-    //drawTextureQuad(m->titleTextureID,&WHITE,&b);
+    drawTextureQuad(m->titleTextureID,&WHITE,&b);
 }
 
 void handleEventMenu(Menu *m, const SDL_Event *event){
-    /*if(event->type == SDL_MOUSEBUTTONDOWN){
+    if(event->type == SDL_MOUSEBUTTONDOWN){
         int i;
         float xGL = (event->button.x)*2*(window.orthoGLX)/window.width-window.orthoGLX;
         float yGL = -((event->button.y)*2*(window.orthoGLY)/window.height)+window.orthoGLY;
@@ -172,7 +174,7 @@ void handleEventMenu(Menu *m, const SDL_Event *event){
                 (*m->buttons[i].clickHandle)();
             }
         }
-    }*/
+    }
 }
 /****************************************
 

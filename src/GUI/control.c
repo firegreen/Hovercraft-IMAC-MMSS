@@ -1,9 +1,88 @@
 #include <stdlib.h>
 #include "GUI/control.h"
 #include "SDL_tools.h"
+#include "Object2D/hovercraft.h"
+
+
+SDL_Event controls[NBCONTROLS][NBACTIONS];
+
+void initControls(){
+    int i,j;
+    for(i=CONTROLKEYBOARD1; i<=CONTROLKEYBOARD3;i++){
+        for(j=0;j<NBACTIONS;j++){
+            controls[i][j].type = SDL_KEYDOWN;
+            controls[i][j].key.keysym.mod = KMOD_NONE;
+        }
+        controls[i][FORWARDSTOP].type = SDL_KEYUP;
+        controls[i][BACKWARDSTOP].type = SDL_KEYUP;
+        controls[i][ROTATELEFTSTOP].type = SDL_KEYUP;
+        controls[i][ROTATERIGHTSTOP].type = SDL_KEYUP;
+    }
+    /*for(j=0;j<NBACTIONS;j++){
+        controls[CONTROLKEYBOARD3][j].key.keysym.mod = KMOD_NUM;
+    }*/
+    controls[CONTROLKEYBOARD1][ZOOMMINUS].key.keysym.sym = SDLK_m;
+    controls[CONTROLKEYBOARD1][ZOOMPLUS].key.keysym.sym = SDLK_p;
+    controls[CONTROLKEYBOARD1][FORWARD].key.keysym.sym =
+    controls[CONTROLKEYBOARD1][FORWARDSTOP].key.keysym.sym = SDLK_UP;
+    controls[CONTROLKEYBOARD1][BACKWARD].key.keysym.sym =
+    controls[CONTROLKEYBOARD1][BACKWARDSTOP].key.keysym.sym = SDLK_DOWN;
+    controls[CONTROLKEYBOARD1][ROTATELEFT].key.keysym.sym =
+    controls[CONTROLKEYBOARD1][ROTATELEFTSTOP].key.keysym.sym = SDLK_LEFT;
+    controls[CONTROLKEYBOARD1][ROTATERIGHT].key.keysym.sym =
+    controls[CONTROLKEYBOARD1][ROTATERIGHTSTOP].key.keysym.sym = SDLK_RIGHT;
+
+    controls[CONTROLKEYBOARD2][ZOOMMINUS].key.keysym.sym = SDLK_r;
+    controls[CONTROLKEYBOARD2][ZOOMPLUS].key.keysym.sym = SDLK_t;
+#ifdef WIN32
+    controls[CONTROLKEYBOARD2][FORWARD].key.keysym.sym =
+    controls[CONTROLKEYBOARD2][FORWARDSTOP].key.keysym.sym = SDLK_w;
+    controls[CONTROLKEYBOARD2][BACKWARD].key.keysym.sym =
+    controls[CONTROLKEYBOARD2][BACKWARDSTOP].key.keysym.sym = SDLK_s;
+    controls[CONTROLKEYBOARD2][ROTATELEFT].key.keysym.sym =
+    controls[CONTROLKEYBOARD2][ROTATELEFTSTOP].key.keysym.sym = SDLK_a;
+    controls[CONTROLKEYBOARD2][ROTATERIGHT].key.keysym.sym =
+    controls[CONTROLKEYBOARD2][ROTATERIGHTSTOP].key.keysym.sym = SDLK_d;
+#else
+    controls[CONTROLKEYBOARD2][FORWARD].key.keysym.sym =
+    controls[CONTROLKEYBOARD2][FORWARDSTOP].key.keysym.sym = SDLK_z;
+    controls[CONTROLKEYBOARD2][BACKWARD].key.keysym.sym =
+    controls[CONTROLKEYBOARD2][BACKWARDSTOP].key.keysym.sym = SDLK_s;
+    controls[CONTROLKEYBOARD2][ROTATELEFT].key.keysym.sym =
+    controls[CONTROLKEYBOARD2][ROTATELEFTSTOP].key.keysym.sym = SDLK_q;
+    controls[CONTROLKEYBOARD2][ROTATERIGHT].key.keysym.sym =
+    controls[CONTROLKEYBOARD2][ROTATERIGHTSTOP].key.keysym.sym = SDLK_d;
+#endif
+    controls[CONTROLKEYBOARD3][ZOOMMINUS].key.keysym.sym = SDLK_KP_PLUS;
+    controls[CONTROLKEYBOARD3][ZOOMPLUS].key.keysym.sym = SDLK_KP_MINUS;
+    controls[CONTROLKEYBOARD3][FORWARD].key.keysym.sym =
+    controls[CONTROLKEYBOARD3][FORWARDSTOP].key.keysym.sym = SDLK_KP8;
+    controls[CONTROLKEYBOARD3][BACKWARD].key.keysym.sym =
+    controls[CONTROLKEYBOARD3][BACKWARDSTOP].key.keysym.sym = SDLK_KP5;
+    controls[CONTROLKEYBOARD3][ROTATELEFT].key.keysym.sym =
+    controls[CONTROLKEYBOARD3][ROTATELEFTSTOP].key.keysym.sym = SDLK_KP4;
+    controls[CONTROLKEYBOARD3][ROTATERIGHT].key.keysym.sym =
+    controls[CONTROLKEYBOARD3][ROTATERIGHTSTOP].key.keysym.sym = SDLK_KP6;
+
+    controls[CONTROLMOUSE][ZOOMMINUS].type =
+    controls[CONTROLMOUSE][ZOOMPLUS].type = SDL_MOUSEBUTTONDOWN;
+    controls[CONTROLMOUSE][ZOOMPLUS].button.button = SDL_BUTTON_WHEELDOWN;
+    controls[CONTROLMOUSE][ZOOMMINUS].button.button = SDL_BUTTON_WHEELUP;
+    controls[CONTROLMOUSE][FORWARD].type =
+    controls[CONTROLMOUSE][BACKWARD].type = SDL_MOUSEBUTTONDOWN;
+    controls[CONTROLMOUSE][FORWARDSTOP].type =
+    controls[CONTROLMOUSE][BACKWARDSTOP].type = SDL_MOUSEBUTTONUP;
+    controls[CONTROLMOUSE][FORWARD].button.button =
+    controls[CONTROLMOUSE][FORWARDSTOP].button.button = SDL_BUTTON_LEFT;
+    controls[CONTROLMOUSE][BACKWARD].button.button =
+    controls[CONTROLMOUSE][BACKWARDSTOP].button.button = SDL_BUTTON_RIGHT;
+    controls[CONTROLMOUSE][ROTATELEFT].type =
+    controls[CONTROLMOUSE][ROTATELEFTSTOP].type =
+    controls[CONTROLMOUSE][ROTATERIGHT].type =
+    controls[CONTROLMOUSE][ROTATERIGHTSTOP].type= SDL_MOUSEMOTION;
+}
 
 void initJoystick(Joystick *input,int numeroJoystick)
-
 {
 
     if(numeroJoystick < SDL_NumJoysticks())
@@ -159,4 +238,10 @@ Point2D convertWindowPointToGLPoint(Point2D p){
     retour.x = p.x * window.orthoGLX*2 / window.width -window.orthoGLX;
     retour.y = p.y * window.orthoGLY*-2 / window.height +window.orthoGLY;
     return retour;
+}
+
+SDL_Event* getControls(int i){
+    if(i<0 || i>=NBCONTROLS)
+        return controls[0];
+    return controls[i];
 }
