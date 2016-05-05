@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stddef.h>
 #include "SDL_tools.h"
-#define SEAFILE "images/sea.jpg"
-
 #ifdef __APPLE__
 #include <SDL.h>
 #include <SDL_image.h>
@@ -322,5 +320,5 @@ void readFile(Map* map, char* path, int* error)
         }
         addObjectToMap(map,o,makePoint(o->x,o->y));
     }
-    *error = NOERROR;
+    *error = NONEERROR;
 }

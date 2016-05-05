@@ -13,7 +13,7 @@
 #include "Object2D/object.h"
 #include "quadTree.h"
 
-typedef enum READERROR { EOFREACHED, BADFORMAT, FILENOTEXIST, NOERROR } ReadError;
+typedef enum READERROR { EOFREACHED, BADFORMAT, FILENOTEXIST, NONEERROR } ReadError;
 
 typedef struct Map {
   float width, height;

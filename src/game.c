@@ -1,9 +1,4 @@
 #include "game.h"
-#include "SDL_tools.h"
-#include "GUI/level.h"
-#include "image_src.h"
-#include "Object2D/hovercraft.h"
-#include "GUI/menu.h"
 #include <stdlib.h>
 
 #ifdef __APPLE__
@@ -19,47 +14,142 @@
 #endif
 
 
-void drawGame(){
-    switch (Game.currentMode) {
-    case MODE_MAINMENU :
-        drawMenu(&Game.currentModeStruct->menu);
-        break;
-    case MODE_LEVEL :
-        if(Game.specialMode)
-            specialDrawLevel(&(Game.currentModeStruct->level),Game.specialState);
-        else
-            drawLevel(&(Game.currentModeStruct->level));
-        break;
-    default :
-        break;
-    }
-}
+void drawGame()
+{
+    if(Game.transitionMode)
+    {
+        if(Game.specialState<1)
+        {
+            glPushMatrix();
+            glTranslatef(-window.orthoGLX + window.orthoGLX*2*Game.specialState,0,0);
+            switch(Game.nextMode)
+            {
+            case MODE_MAINMENU :
+                drawMenu(&Game.ModeStructNext->menu);
+                break;
+            case MODE_LEVEL :
+                if(Game.specialMode)
+                    specialDrawLevel(&(Game.ModeStructNext->level),Game.specialState);
+                else
+                    drawLevel(&(Game.ModeStructNext->level));
+                break;
+            case MODE_ONEPLAYER :
+                drawOnePlayer(&(Game.ModeStructNext->oneplayer));
+                break;
+            case MODE_TWOPLAYERS :
+                drawTwoPlayers(&(Game.ModeStructNext->twoplayers));
+                break;
+            case MODE_INSTRUCTIONS :
+                drawInstructions(&(Game.ModeStructNext->instruction));
+                break;
+            case MODE_CREDITS :
+                drawCredits(&(Game.ModeStructNext->credit));
+                break;
+            default :
+                break;
+                glPopMatrix();
+            }
 
-void update(){
-    int i,j;
-    for(i=0;i<SDL_NumJoysticks();i++){
-        for(j=0;j<SDL_JoystickNumBalls(Game.joysticks[i].joystick);j++){
-            Game.joysticks[i].trackballs->x = 0;
-            Game.joysticks[i].trackballs->y = 0;
+            glPushMatrix();
+            glTranslatef(window.orthoGLX*2*Game.specialState,0,0);
+            switch(Game.currentMode)
+            {
+            case MODE_MAINMENU :
+                drawMenu(&Game.currentModeStruct->menu);
+                break;
+            case MODE_LEVEL :
+                if(Game.specialMode)
+                    specialDrawLevel(&(Game.currentModeStruct->level),Game.specialState);
+                else
+                    drawLevel(&(Game.currentModeStruct->level));
+                break;
+            case MODE_ONEPLAYER :
+                initOnePlayer(&(Game.currentModeStruct->oneplayer),"images/instructions.png",4);
+                drawOnePlayer(&(Game.currentModeStruct->oneplayer));
+                break;
+            case MODE_TWOPLAYERS :
+                initTwoPlayers(&(Game.currentModeStruct->twoplayers),"images/instructions.png",4);
+                drawTwoPlayers(&(Game.currentModeStruct->twoplayers));
+                break;
+            case MODE_INSTRUCTIONS :
+                initInstructions(&(Game.currentModeStruct->instruction),"images/instructions.png");
+                drawInstructions(&(Game.currentModeStruct->instruction));
+                break;
+            case MODE_CREDITS :
+                initCredits(&(Game.currentModeStruct->credit),"images/credits.png");
+                drawCredits(&(Game.currentModeStruct->credit));
+                break;
+            default :
+                glPopMatrix();
+            }
         }
     }
-    switch (Game.currentMode) {
-    case MODE_LEVEL:
-        if(Game.specialMode)
-            Game.specialMode = specialUpdateLevel(&Game.currentModeStruct->level,&Game.specialState);
-        else
-            updateLevel(&Game.currentModeStruct->level);
-        break;
-    case MODE_MAINMENU:
-        //updateMenu(Game.currentModeStruct->menu);
-    default :
-        break;
+    else
+    {
+        switch (Game.currentMode)
+        {
+        case MODE_MAINMENU :
+            drawMenu(&Game.currentModeStruct->menu);
+            break;
+        case MODE_LEVEL :
+            if(Game.specialMode)
+                specialDrawLevel(&(Game.currentModeStruct->level),Game.specialState);
+            else
+                drawLevel(&(Game.currentModeStruct->level));
+            break;
+        case MODE_ONEPLAYER :
+            //initOnePlayer(&(Game.currentModeStruct->oneplayer),"images/instructions.png", 4);
+            drawOnePlayer(&(Game.currentModeStruct->oneplayer));
+            break;
+        case MODE_TWOPLAYERS :
+            //initTwoPlayers(&(Game.currentModeStruct->twoplayers),"images/instructions.png", 4);
+            drawTwoPlayers(&(Game.currentModeStruct->twoplayers));
+            break;
+        case MODE_INSTRUCTIONS :
+            drawInstructions(&(Game.currentModeStruct->instruction));
+            break;
+        case MODE_CREDITS :
+            //initCredits(&(Game.currentModeStruct->credit),"images/credits.png");
+            drawCredits(&(Game.currentModeStruct->credit));
+            break;
+        default :
+            break;
+        }
     }
-
 }
-int handleEvent(const SDL_Event* event){
+
+void update()
+{
+    if(Game.transitionMode)
+    {
+        Game.specialState += 0.05;
+    }
+    else
+    {
+        switch (Game.currentMode)
+        {
+        case MODE_LEVEL:
+            if(Game.specialMode)
+                Game.specialMode = specialUpdateLevel(&Game.currentModeStruct->level,&Game.specialState);
+            else
+                updateLevel(&Game.currentModeStruct->level);
+            break;
+        case MODE_MAINMENU:
+            //updateMenu(Game.currentModeStruct->menu);
+            break;
+        case MODE_INSTRUCTIONS:
+
+            break;
+        default :
+            break;
+        }
+    }
+}
+int handleEvent(const SDL_Event* event)
+{
     if(event->type == SDL_QUIT) return 0;
-    if(event->type == SDL_KEYUP){
+    /*if(event->type == SDL_KEYUP)
+    {
         if(event->key.keysym.sym == SDLK_F4)
             if(event->key.keysym.mod == KMOD_LALT || event->key.keysym.mod == KMOD_RALT)
             {
@@ -67,86 +157,87 @@ int handleEvent(const SDL_Event* event){
             }
     }
     if(windowEventHandler(event)) return 1;
-    if(handleJoystickEvent(Game.joysticks,event)) return 1;
-    switch (Game.currentMode) {
+    //if(handleJoystickEvent(Game.joysticks,event)) return 1;
+    switch (Game.currentMode)
+    {
     case MODE_LEVEL:
         handleEventLevel(&(Game.currentModeStruct->level),event);
         break;
     case MODE_MAINMENU:
-        //handleEventMenu(Game.currentModeStruct->menu,event);
+        //handleEventMenu(&(Game.currentModeStruct->menu), event);
+        break;
+    case MODE_INSTRUCTIONS:
+         handleEventGoBack(Game.currentModeStruct->instruction.retour, event);
+         break;
+    case MODE_CREDITS:
+         handleEventGoBack(Game.currentModeStruct->credit.retour, event);
+         break;
+    case MODE_ONEPLAYER:
+        handleEventGoBackPlayer(Game.currentModeStruct->oneplayer.buttons, event);
+        break;
+    case MODE_TWOPLAYERS:
+        handleEventGoBackPlayer(Game.currentModeStruct->twoplayers.buttons, event);
+        break;
     default :
         break;
     }
 
+    return 1;*/
     return 1;
 }
 
-void initGameAudio(){
+void initGameAudio()
+{
     initialize_audio(AUDIO_S16SYS,22050,2,512);
     Game.audioIDs[MAINAUDIO1] = makeAudio("sea_theme.wav",1,10);
     Game.audioIDs[MAINAUDIO2] = makeAudio("stardust_theme.wav",0,150);
     Game.audioIDs[ACCAUDIO] = makeAudio("hovercraft.wav",1,50);
 }
 
-void initGameTextures(){
+void initGameTextures()
+{
     glGenTextures(NBTEXTURES, Game.textureIDs);
     makeTexture(Game.textureIDs[ONETEXTURE],"images/un.png",GL_RGBA);
     makeTexture(Game.textureIDs[TWOTEXTURE],"images/deux.png",GL_RGBA);
     makeTexture(Game.textureIDs[THREETEXTURE],"images/trois.png",GL_RGBA);
+
 }
 
-void initializeGame(){
-
+void initializeGame()
+{
+    /*char fakeParam[] = "fake";
+    char *fakeargv[] = { fakeParam, NULL };
+    int fakeargc = 1;
+    glutInit( &fakeargc, fakeargv);*/
     Game.windowWidth = 640;
     Game.windowHeight = 480;
     Game.fullscreen = 0;
-    Game.currentMode = MODE_LEVEL;
+    Game.currentMode = MODE_MAINMENU;
     Game.currentModeStruct = malloc(sizeof(ModeStruct));
-<<<<<<< HEAD
-=======
-    Game.currentModeStruct->level.players = malloc(1*sizeof(Hovercraft));
-    Game.currentModeStruct->level.nbPlayers=1;
-    initHovercraft(Game.currentModeStruct->level.players);
-    Object* o = malloc(sizeof(Object));
-    makeObject(o,1,1,1,3,1,0,0);
-    o->effectDelays[0]=1;
-    Effect e;
-    e.rebound.resistance = 40;
-    e.rebound.rebound_value = 1;
-    o->effectsAtCollision[0]=e;
-    o->effectsTypesAtCollision[0]=POINTSPLUS;
-    makeCircle(o->shapes,3,makePoint(0,0));
-    o->x = -10; o->y = 10;
+    Game.specialMode = 0;
+    Game.specialState = 0;
+    Game.transitionMode = 0;
 
-    Object* o2 = malloc(sizeof(Object));
-    makeObject(o2,1,1,1,3,1,0,0);
-    o2->effectDelays[0]=1;
-    o2->effectsAtCollision[0]=e;
-    o2->effectsTypesAtCollision[0]=REBOUND;
-    makeCircle(o2->shapes,3,makePoint(0,0));
-    o2->x = 0; o2->y = -10;
-
->>>>>>> master
-    int i = 0;
+    /*int i = 0;
     int max =SDL_NumJoysticks()>NBJOYSTICK?NBJOYSTICK:SDL_NumJoysticks();
-    for(;i<max;i++){
+    for(; i<max; i++)
+    {
         initJoystick(Game.joysticks+i,i);
-    }
+    }*/
 
     loadConfig();
     initialize_window(Game.windowWidth,Game.windowHeight,Game.fullscreen);
+    initMainMenu(&(Game.currentModeStruct->menu));
     initGameAudio();
     initGameTextures();
-    playAudioFadeIn(Game.audioIDs[MAINAUDIO2],0.1);
+    //playAudioFadeIn(Game.audioIDs[MAINAUDIO2],0.1);
     SDL_PauseAudio(0);
-    initLevel(&Game.currentModeStruct->level,1,1);
-    Game.specialState = 0;
-    Game.specialMode = 1;
 }
 
 
 
-void game(){
+void game()
+{
     SDL_Event event;
     int loop = 1;
     while (loop)
@@ -156,11 +247,11 @@ void game(){
         {
             loop = handleEvent(&event);
         }
-        update();
+        //update();
         glMatrixMode(GL_MODELVIEW);
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
-        drawGame();
+        //drawGame();
         SDL_GL_SwapBuffers();
         unsigned int delay = SDL_GetTicks() - startTime;
         if(delay < MILLISECOND_PER_FRAME)

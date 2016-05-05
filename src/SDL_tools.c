@@ -212,19 +212,15 @@ void makeTexture(GLuint id, const char *filename, GLint textureFormat){
         GLenum format;
         switch(image->format->BytesPerPixel) {
         case 1:
-            printf("lol");
             format = GL_BLUE;
             break;
         case 3:
-            printf("lol2");
             format = GL_RGB;
             break;
         case 4:
-            printf("lol3");
             format = GL_RGBA;
             break;
         default:
-            printf("lol4");
             format = GL_RGBA;
             fprintf(stderr, "Format des pixels de l'image %d non pris en charge - byte per pixel :%d\n",
                     id, image->format->BytesPerPixel);

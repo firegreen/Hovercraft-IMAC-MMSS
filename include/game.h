@@ -17,16 +17,19 @@ typedef enum { ONETEXTURE=0, TWOTEXTURE, THREETEXTURE, NBTEXTURES} TextureID;
 
 typedef union ModeStruct {
     Level level;
-<<<<<<< HEAD
-    //caMenu menu;
-=======
     Menu menu;
->>>>>>> master
+    OnePlayer oneplayer;
+    TwoPlayers twoplayers;
+    Instruction instruction;
+    Credits credit;
 } ModeStruct;
 
 struct Game{
+
   Mode currentMode;
+  Mode nextMode;
   ModeStruct* currentModeStruct;
+  ModeStruct* ModeStructNext;
   int windowWidth, windowHeight;
   unsigned char fullscreen;
   unsigned char levelIsUnLocked[NBLEVELS];
@@ -36,7 +39,8 @@ struct Game{
   GLuint textureIDs[NBTEXTURES];
   Joystick joysticks[NBJOYSTICK];
   float specialState;
-  unsigned char specialMode;
+  char specialMode;
+  char transitionMode;
 } Game;
 
 void drawGame();

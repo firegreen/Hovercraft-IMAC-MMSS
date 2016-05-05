@@ -1,11 +1,7 @@
 #ifndef MODE_H
 #define MODE_H
 
-<<<<<<< HEAD
-=======
-
->>>>>>> d598967e53a2616e54207fee7f9563786750be96
-typedef enum Mode {MODE_MAINMENU, MODE_LEVELMENU, MODE_LEVEL} Mode;
+typedef enum Mode {MODE_MAINMENU, MODE_LEVELMENU, MODE_LEVEL, MODE_ONEPLAYER, MODE_TWOPLAYERS, MODE_INSTRUCTIONS, MODE_CREDITS} Mode;
 
 void drawMode(Mode mode);
 void updateMode(Mode mode);

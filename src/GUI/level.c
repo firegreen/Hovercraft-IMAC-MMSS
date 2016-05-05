@@ -95,7 +95,7 @@ void initLevel(Level *level, int mapid, int nbplayers){
     itoa(mapid,strfile+4,10);
     int error;
     readFile(&level->map,strfile,&error);
-    if(error!=NOERROR){
+    if(error!=NONEERROR){
         fprintf(stderr,"Error while reading map %d, exit...\n",mapid);
         exit(1);
     }

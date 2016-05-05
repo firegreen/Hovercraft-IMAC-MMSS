@@ -28,7 +28,11 @@ src/SDL_tools.c
 src/GUI/control.c
 Makefile
 <<<<<<< HEAD
+<<<<<<< HEAD
 map1.txt
 =======
 src/GUI/menu.c
 >>>>>>> master
+=======
+src/GUI/menu.c
+>>>>>>> menu
