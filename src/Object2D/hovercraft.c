@@ -15,6 +15,8 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+#include "textures.h"
+#include "audios.h"
 
 #define MARGE 0.05
 #define INITIALVIEWSIZE 70
@@ -23,9 +25,28 @@
 void initHovercraft(Hovercraft* hovercraft, const Map* map, unsigned int id,
                     Point2D viewLeftTop, float viewWidth, float viewHeight,
                     SDL_Event* actionsEvents){
-    makeObject(&(h_object),1,2,100,6,0,10,1);
-    makeRectangle(h_object.shapes+1,-1.6,2,3.2,4,makeColor4f(0.3,0.2,0.5,1),1);
-    makeCircle(h_object.shapes,1.6,makePoint(0,2.3f),makeColor4f(0.2,0.2,0.4,1),1);
+    makeObject(&(h_object),1,2,100,10,0,10,1);
+    Color4f c;
+    switch (id) {
+    case 1:
+        c = makeColor4f(1,0.0,0.1,1);
+        break;
+    case 2:
+        c = makeColor4f(0.1,0.2,1,1);
+        break;
+    case 3:
+        c = makeColor4f(1,0.9,0.3,1);
+        break;
+    case 4:
+        c = makeColor4f(0.3,0.9,0.1,1);
+    default:
+        c = makeColor4f(0.25,0.35,0.4,1);
+        break;
+    }
+    makeRectangleWithTexture(h_object.shapes,-3,4,6,8,c,getTexture(27),
+                             getTextureWidth(27),getTextureHeight(27),0);
+    makeCircleWithTexture(h_object.shapes+1,3,makePoint(0,3.8f),c,getTexture(28),
+               getTextureWidth(28),getTextureHeight(28));
 
     Effect e;
     e.rebound.resistance = 100;
@@ -61,7 +82,20 @@ void drawHovercraft(const Hovercraft* hovercraft){
     glPushMatrix();
     drawObject(&(h_object));
     glPopMatrix();
-    glColor3f(0.7,0.1,0.1);
+}
+
+void drawMiniHovercraft(const Hovercraft* hovercraft){
+    glPushMatrix();
+    int i;
+    glColor3f(h_object.shapes[0].color.r,h_object.shapes[0].color.g,h_object.shapes[0].color.b);
+    glTranslatef(h_object.x,h_object.y,0);
+    glRotatef(h_object.angle-90.,0,0,1.);
+    glScalef(1.5,1.5,1);
+    for(i=0;i<h_object.nbShapes;i++)
+    {
+        drawMiniShape(h_object.shapes+i);
+    }
+    glPopMatrix();
 }
 
 int cmpEvent(const SDL_Event* e1, const SDL_Event* e2){
@@ -77,6 +111,9 @@ int cmpEvent(const SDL_Event* e1, const SDL_Event* e2){
         return e1->button.button == e2->button.button;
     case SDL_MOUSEMOTION:
         return 1;
+    case SDL_JOYBUTTONDOWN:
+    case SDL_JOYBUTTONUP:
+        return e1->jbutton.button == e2->jbutton.button;
     default:
         return 0;
     }
@@ -148,21 +185,16 @@ int handleEventHovercraft(Hovercraft *hovercraft, const SDL_Event* e){
 void updateHovercraft(Hovercraft* hovercraft){
     if(h_object.receivedModifs!=NULL){
         Modification* current = h_object.receivedModifs;
-        Modification* nextNext;
-
         while(current->next!=NULL){
             if(applyEffectToHovercraft(current->next,hovercraft)){
-                nextNext = current->next->next;
-                free(current->next);
-                current->next = nextNext;
+                removeModifications(&hovercraft->physical_body,&current->next);
             }
             else
                 current = current->next;
         }
         if(applyEffectToHovercraft(h_object.receivedModifs,hovercraft)){
-            current = h_object.receivedModifs->next;
-            free(h_object.receivedModifs);
-            h_object.receivedModifs = current;
+            removeModifications(&hovercraft->physical_body,&(h_object.receivedModifs));
+
         }
     }
     if(hovercraft->rotationAccelerate){
@@ -178,7 +210,7 @@ void updateHovercraft(Hovercraft* hovercraft){
     hovercraft->direction.y = sinf(angle);
     if(hovercraft->linearAccelerate)
     {
-
+        playAudioFadeIn(1,0.5);
         h_object.ax= hovercraft->moteur * hovercraft->direction.x *
                      hovercraft->linearAccelerate;
         h_object.ay= hovercraft->moteur * hovercraft->direction.y *
@@ -186,8 +218,8 @@ void updateHovercraft(Hovercraft* hovercraft){
         float speedX = h_object.vx+h_object.ax; speedX *= speedX;
         float speedY = h_object.vy+h_object.ay; speedY *= speedY;
         float speedMax = hovercraft->max_linear_speed*hovercraft->max_linear_speed;
-        if(speedX+speedY > speedMax && h_object.vx*hovercraft->direction.y>0 &&
-                h_object.vy*hovercraft->direction.x>0)
+        if(speedX+speedY > speedMax && h_object.vx*hovercraft->direction.x>0 &&
+                h_object.vy*hovercraft->direction.y>0)
         {
             h_object.ax=0;
             h_object.ay=0;
@@ -209,16 +241,19 @@ void updateHovercraft(Hovercraft* hovercraft){
 Vector2D newDirection(BotHovercraft *hovercraft, Chained_Object* objects){
     Chained_Object* co;
     int i=0;
-    float cosLeft = cosf(M_PI*0.15), sinLeft =sinf(M_PI*0.15);
-    Vector2D direction = hovercraft->path->direction;
+    float cosLeft = cosf(M_PI*0.4), sinLeft =sinf(M_PI*0.4);
+    Vector2D direction1,direction2;
+    direction1 = direction2 = hovercraft->path->direction;
     Line l;
     Intersection intersect;
-    for(i=0;i<5;i++){
-        direction = makeVector(direction.x*cosLeft - direction.y*sinLeft,
-                                direction.x*sinLeft + direction.y*cosLeft);
+    for(i=0;i<3;i++){
+        direction1 = makeVector(direction1.x*cosLeft - direction1.y*sinLeft,
+                          direction1.x*sinLeft + direction1.y*cosLeft);
+        direction2 = makeVector(direction2.x*cosLeft + direction2.y*sinLeft,
+                          direction2.x*sinLeft - direction2.y*cosLeft);
         l.start = makePoint(h_object.x,h_object.y);
-        l.end = makePoint(h_object.x+direction.x*6*h_object.colliderRadius,
-                          h_object.y+direction.y*6*h_object.colliderRadius);
+        l.end = makePoint(h_object.x+direction1.x*3*h_object.colliderRadius,
+                          h_object.y+direction1.y*3*h_object.colliderRadius);
         co=objects;
         while (co!=NULL) {
             if(collisionBetweenLineAndObject(l,co->object,&intersect)){
@@ -226,53 +261,58 @@ Vector2D newDirection(BotHovercraft *hovercraft, Chained_Object* objects){
             }
             co = co->next;
         }
-        if(co==NULL) return direction;
-    }
-    float cosRight = cosf(-M_PI*0.15), sinRight =sinf(-M_PI*0.15);
-    direction = hovercraft->path->direction;
-    for(i=0;i<5;i++){
-        direction = makeVector(direction.x*cosRight - direction.y*sinRight,
-                                direction.x*sinRight + direction.y*cosRight);
-        l.start = makePoint(h_object.x,h_object.y);
-        l.end = makePoint(h_object.x+direction.x*6*h_object.colliderRadius,
-                          h_object.y+direction.y*6*h_object.colliderRadius);
-        co=objects;
-        while (co!=NULL) {
-            if(collisionBetweenLineAndObject(l,co->object,&intersect)){
-                break;
-            }
-            co = co->next;
-        }
-        if(co==NULL) return direction;
-    }
-    float cosBehind = cosf(M_PI), sinBehind =sinf(M_PI);
+        if(co==NULL) return direction1;
 
-    direction = makeVector(hovercraft->path->direction.x*cosBehind -
-                      hovercraft->path->direction.y*sinBehind,
-                      hovercraft->path->direction.x*sinBehind +
-                      hovercraft->path->direction.y*cosBehind);
-    return direction;
+        l.start = makePoint(h_object.x,h_object.y);
+        l.end = makePoint(h_object.x+direction2.x*3*h_object.colliderRadius,
+                          h_object.y+direction2.y*3*h_object.colliderRadius);
+        co=objects;
+        while (co!=NULL) {
+            if(collisionBetweenLineAndObject(l,co->object,&intersect)){
+                break;
+            }
+            co = co->next;
+        }
+        if(co==NULL) return direction2;
+    }
+    return makeVector(-hovercraft->path->direction.x,-hovercraft->path->direction.y);;
 }
 
-void updateBotHovercraft(BotHovercraft *hovercraft, Chained_Object* objects){
+Object* closestObject(const BotHovercraft *hovercraft, Chained_Object* target, float min){
+    Chained_Object* item = target;
+    float dx,dy,d;
+    Object*  minObject=NULL;
+    while(item!=NULL){
+        dx = item->object->x - h_object.x; dx*=dx;
+        dy = item->object->y - h_object.y; dy*=dy;
+        d = dx+dy;
+        if(d<min)
+        {
+            min = d;
+            minObject=item->object;
+        }
+        item = item->next;
+    }
+    return minObject;
+}
+
+void updateBotHovercraft(BotHovercraft *hovercraft, Chained_Object* objects, Chained_Object* target){
     if(h_object.receivedModifs!=NULL){
         Modification* current = h_object.receivedModifs;
-        Modification* nextNext;
-
         while(current->next!=NULL){
             if(applyEffectToHovercraft(current->next,&hovercraft->h)){
-                nextNext = current->next->next;
-                free(current->next);
-                current->next = nextNext;
+                removeModifications(&hovercraft->h.physical_body,&current->next);
             }
             else
                 current = current->next;
         }
         if(applyEffectToHovercraft(h_object.receivedModifs,&hovercraft->h)){
-            current = h_object.receivedModifs->next;
-            free(h_object.receivedModifs);
-            h_object.receivedModifs = current;
+            removeModifications(&hovercraft->h.physical_body,&(h_object.receivedModifs));
         }
+    }
+    Object* o = closestObject(hovercraft,target,10000000.);
+    if(o!=NULL){
+        giveGoalToBot(hovercraft,makePoint(o->x,o->y));
     }
     if(hovercraft->path==NULL){
         h_object.ax=0;
@@ -283,12 +323,13 @@ void updateBotHovercraft(BotHovercraft *hovercraft, Chained_Object* objects){
         updateObject(&h_object);
     }
     else{
+        Vector2D distance = makeVectorAB(makePoint(h_object.x,h_object.y),hovercraft->goal);
         Line l;
         l.start = makePoint(h_object.x,h_object.y);
         l.end = makePoint(h_object.x+hovercraft->path->direction.x*
-                            (hovercraft->h.max_linear_speed+h_object.colliderRadius*2),
+                            (hovercraft->h.max_linear_speed+3*h_object.colliderRadius),
                           h_object.y+hovercraft->path->direction.y*
-                            (hovercraft->h.max_linear_speed+h_object.colliderRadius*2));
+                            (hovercraft->h.max_linear_speed+3*h_object.colliderRadius));
         Chained_Object* co=objects;
         Intersection intersect;
         while(co!=NULL){
@@ -298,7 +339,6 @@ void updateBotHovercraft(BotHovercraft *hovercraft, Chained_Object* objects){
             }
             co = co->next;
         }
-        Vector2D distance = makeVectorAB(makePoint(h_object.x,h_object.y),hovercraft->goal);
         if(co==NULL){
             if(hovercraft->path->below==NULL){
                 if(distance.x*distance.x +distance.y*distance.y <12){
@@ -314,9 +354,9 @@ void updateBotHovercraft(BotHovercraft *hovercraft, Chained_Object* objects){
             else{
                 co=objects;
                 l.end = makePoint(h_object.x+hovercraft->path->below->direction.x*
-                                    (hovercraft->h.max_linear_speed+h_object.colliderRadius*2),
+                                    (hovercraft->h.max_linear_speed+3*h_object.colliderRadius),
                                   h_object.y+hovercraft->path->below->direction.y*
-                                    (hovercraft->h.max_linear_speed+h_object.colliderRadius*2));
+                                    (hovercraft->h.max_linear_speed+3*h_object.colliderRadius));
 
                 while(co!=NULL){
                     if(collisionBetweenLineAndObject(l,co->object,&intersect)){
@@ -334,17 +374,21 @@ void updateBotHovercraft(BotHovercraft *hovercraft, Chained_Object* objects){
         h_object.ax= hovercraft->h.moteur *
                 cosf((h_object.angle) * M_PI / 180.)/2.;
         h_object.ay= hovercraft->h.moteur *
-                sin((h_object.angle) * M_PI / 180.)/2.;
+                sinf((h_object.angle) * M_PI / 180.)/2.;
         float a = hovercraft->path->direction.x*h_object.ay,
                b = hovercraft->path->direction.y*h_object.ax;
         float speedX,speedY,speedMax;
         if(hovercraft->path->direction.x*h_object.ax>0 || hovercraft->path->direction.y*h_object.ay>0){
             if(fabs(a-b)<hovercraft->error){
-                h_object.vAngle = 0;
+                if(distance.x*distance.x +distance.y*distance.y <500){
+                    h_object.ax*=0.4;
+                    h_object.ay*=0.4;
+                    h_object.vAngle-=h_object.vAngle*0.3;
+                }
             }
             else{
-                h_object.ax*=0.7;
-                h_object.ay*=0.7;
+                h_object.ax*=0.9;
+                h_object.ay*=0.9;
                 if(a<b){
                     if(fabs(h_object.vAngle+h_object.aAngle) < hovercraft->h.max_rotation_speed){
                         h_object.vAngle += h_object.aAngle;
@@ -373,11 +417,15 @@ void updateBotHovercraft(BotHovercraft *hovercraft, Chained_Object* objects){
             h_object.ax*=-1;
             h_object.ay*=-1;
             if(fabs(a-b)<hovercraft->error){
-                h_object.vAngle = 0;
+                if(distance.x*distance.x +distance.y*distance.y <500){
+                    h_object.ax*=0.6;
+                    h_object.ay*=0.6;
+                    h_object.vAngle-=h_object.vAngle*0.5;
+                }
             }
             else{
-                h_object.ax*=0.5;
-                h_object.ay*=0.5;
+                h_object.ax*=0.8;
+                h_object.ay*=0.8;
                 if(a>b){
                     if(fabs(h_object.vAngle+h_object.aAngle) < hovercraft->h.max_rotation_speed){
                         h_object.vAngle += h_object.aAngle*0.5;
@@ -401,11 +449,6 @@ void updateBotHovercraft(BotHovercraft *hovercraft, Chained_Object* objects){
                 h_object.vy=-hovercraft->h.max_linear_speed/2 *
                         sinf((h_object.angle) * M_PI / 180.);
             }
-        }
-        if(distance.x*distance.x +distance.y*distance.y <500){
-            h_object.ax*=0.01;
-            h_object.ay*=0.01;
-            h_object.vAngle*=0.1;
         }
         updateObject(&h_object);
     }

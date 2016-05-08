@@ -22,101 +22,119 @@
 
 void drawGame()
 {
+    int i=0;
     if(Game.transitionMode)
     {
-        if(Game.specialState<1)
+        loadCustomViewport(window.width*Game.specialState*-Game.transitionMode,0,window.width,window.height);
+        glClearColor(0,0,0,0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        switch(Game.currentMode)
         {
-            glPushMatrix();
-            glTranslatef(-window.orthoGLX + window.orthoGLX*2*Game.specialState,0,0);
-            switch(Game.nextMode)
-            {
-            case MODE_MAINMENU :
-                drawMenu(&Game.ModeStructNext->menu);
-                break;
-            case MODE_LEVEL :
+        case MODE_MAINMENU :
+        case MODE_CREDITS:
+        case MODE_INSTRUCTIONS:
+        case MODE_ONEPLAYER:
+        case MODE_MULTIPLAYERS:
+            if(Game.nextMode==MODE_LEVEL){
                 if(Game.specialMode)
-                    specialDrawLevel(&(Game.ModeStructNext->level),Game.specialState);
+                    specialdrawMenu(&Game.currentModeStruct->menu,Game.specialState,
+                                    window.width*Game.specialState*Game.transitionMode);
                 else
-                    drawLevel(&(Game.ModeStructNext->level));
-                break;
-            case MODE_ONEPLAYER :
-                drawOnePlayer(&(Game.ModeStructNext->oneplayer));
-                break;
-            case MODE_TWOPLAYERS :
-                drawTwoPlayers(&(Game.ModeStructNext->twoplayers));
-                break;
-            case MODE_INSTRUCTIONS :
-                drawInstructions(&(Game.ModeStructNext->instruction));
-                break;
-            case MODE_CREDITS :
-                drawCredits(&(Game.ModeStructNext->credit));
-                break;
-            default :
-                break;
-                glPopMatrix();
+                    drawMenu(&Game.currentModeStruct->menu,window.width*Game.specialState*Game.transitionMode);
             }
-
-            glPushMatrix();
-            glTranslatef(window.orthoGLX*2*Game.specialState,0,0);
-            switch(Game.currentMode)
+            else{
+                drawTwoMenu(&Game.currentModeStruct->menu,&Game.modeStructNext->menu,
+                            window.width*Game.specialState*-Game.transitionMode,
+                            (Game.transitionMode<0?-window.width:window.width)
+                            -window.width*Game.specialState*Game.transitionMode);
+                return;
+            }
+            break;
+        case MODE_LEVEL :
+            for(i=0;i<Game.currentModeStruct->level.nbPlayers;i++)
             {
-            case MODE_MAINMENU :
-                drawMenu(&Game.currentModeStruct->menu);
-                break;
-            case MODE_LEVEL :
-                if(Game.specialMode)
-                    specialDrawLevel(&(Game.currentModeStruct->level),Game.specialState);
-                else
-                    drawLevel(&(Game.currentModeStruct->level));
-                break;
-            case MODE_ONEPLAYER :
-                initOnePlayer(&(Game.currentModeStruct->oneplayer),"images/instructions.png",4);
-                drawOnePlayer(&(Game.currentModeStruct->oneplayer));
-                break;
-            case MODE_TWOPLAYERS :
-                initTwoPlayers(&(Game.currentModeStruct->twoplayers),"images/instructions.png",4);
-                drawTwoPlayers(&(Game.currentModeStruct->twoplayers));
-                break;
-            case MODE_INSTRUCTIONS :
-                initInstructions(&(Game.currentModeStruct->instruction),"images/instructions.png");
-                drawInstructions(&(Game.currentModeStruct->instruction));
-                break;
-            case MODE_CREDITS :
-                initCredits(&(Game.currentModeStruct->credit),"images/credits.png");
-                drawCredits(&(Game.currentModeStruct->credit));
-                break;
-            default :
-                glPopMatrix();
+                Game.currentModeStruct->level.players[i].view.viewportleftTop.x
+                        +=window.width*Game.specialState*-Game.transitionMode;
             }
+            if(Game.specialMode)
+                specialDrawLevel(&(Game.currentModeStruct->level),101);
+            else
+                drawLevel(&(Game.currentModeStruct->level));
+            break;
+            for(i=0;i<Game.currentModeStruct->level.nbPlayers;i++)
+            {
+                Game.currentModeStruct->level.players[i].view.viewportleftTop.x
+                        -=window.width*Game.specialState*-Game.transitionMode;
+            }
+        default :
+            break;
+        }
+        loadCustomViewport((Game.transitionMode<0?0:window.width)
+                           -window.width*Game.specialState*Game.transitionMode,0,window.width,window.height);
+        switch(Game.nextMode)
+        {
+        case MODE_MAINMENU :
+        case MODE_CREDITS:
+        case MODE_INSTRUCTIONS:
+        case MODE_ONEPLAYER:
+        case MODE_MULTIPLAYERS:
+            if(Game.specialMode){
+                specialdrawMenu(&Game.modeStructNext->menu,0,
+                                (Game.transitionMode<0?0:window.width)
+                                -window.width*Game.specialState*Game.transitionMode);
+            }
+            else{
+                drawMenu(&Game.modeStructNext->menu,
+                         (Game.transitionMode<0?0:window.width)
+                         -window.width*Game.specialState*Game.transitionMode);
+            }
+            break;
+        case MODE_LEVEL :
+            for(i=0;i<Game.modeStructNext->level.nbPlayers;i++)
+            {
+                Game.modeStructNext->level.players[i].view.viewportleftTop.x
+                        +=(Game.transitionMode<0?0:window.width)
+                        -window.width*Game.specialState*Game.transitionMode;
+            }
+            if(Game.specialMode)
+                specialDrawLevel(&(Game.modeStructNext->level),0);
+            else
+                drawLevel(&(Game.modeStructNext->level));
+            for(i=0;i<Game.modeStructNext->level.nbPlayers;i++)
+            {
+                Game.modeStructNext->level.players[i].view.viewportleftTop.x
+                        -=(Game.transitionMode<0?0:window.width)
+                        -window.width*Game.specialState*Game.transitionMode;
+            }
+            break;
+        default :
+            break;
         }
     }
     else
     {
+        reloadGLrepere();
+        glClearColor(0,0,0,0);
+        glClear(GL_COLOR_BUFFER_BIT);
         switch (Game.currentMode)
         {
         case MODE_MAINMENU :
-            drawMenu(&Game.currentModeStruct->menu);
+        case MODE_CREDITS:
+        case MODE_INSTRUCTIONS:
+        case MODE_ONEPLAYER:
+        case MODE_MULTIPLAYERS:
+            if(Game.specialMode){
+                specialdrawMenu(&Game.currentModeStruct->menu,Game.specialState,0);
+            }
+            else{
+                drawMenu(&Game.currentModeStruct->menu,0);
+            }
             break;
         case MODE_LEVEL :
             if(Game.specialMode)
                 specialDrawLevel(&(Game.currentModeStruct->level),Game.specialState);
             else
                 drawLevel(&(Game.currentModeStruct->level));
-            break;
-        case MODE_ONEPLAYER :
-            initOnePlayer(&(Game.currentModeStruct->oneplayer),"images/instructions.png", 4);
-            drawOnePlayer(&(Game.currentModeStruct->oneplayer));
-            break;
-        case MODE_TWOPLAYERS :
-            initTwoPlayers(&(Game.currentModeStruct->twoplayers),"images/instructions.png", 4);
-            drawTwoPlayers(&(Game.currentModeStruct->twoplayers));
-            break;
-        case MODE_INSTRUCTIONS :
-            drawInstructions(&(Game.currentModeStruct->instruction));
-            break;
-        case MODE_CREDITS :
-            initCredits(&(Game.currentModeStruct->credit),"images/credits.png");
-            drawCredits(&(Game.currentModeStruct->credit));
             break;
         default :
             break;
@@ -128,7 +146,29 @@ void update()
 {
     if(Game.transitionMode)
     {
-        Game.specialState += 0.05;
+        Game.specialState += Game.transitionSpeed;
+        if(Game.transitionSpeed>0.01)
+            Game.transitionSpeed -= Game.transitionSpeed*0.1;
+        Game.transitionMode = Game.specialState<1;
+        if(!Game.transitionMode){
+            if(Game.currentMode>= MODE_MAINMENU && Game.currentMode<=MODE_CREDITS &&
+                  Game.nextMode>= MODE_MAINMENU && Game.nextMode<=MODE_CREDITS){
+                Game.currentModeStruct->menu.buttons = Game.modeStructNext->menu.buttons;
+                Game.currentModeStruct->menu.imageTextureID = Game.modeStructNext->menu.imageTextureID;
+                Game.currentModeStruct->menu.titleTextureID = Game.modeStructNext->menu.titleTextureID;
+                Game.currentModeStruct->menu.nbButtons = Game.modeStructNext->menu.nbButtons;
+            }
+            else{
+                if(Game.currentMode>= MODE_MAINMENU && Game.currentMode<=MODE_CREDITS)
+                {
+                    freeMap2(&Game.currentModeStruct->menu.map);
+                    free(Game.currentModeStruct->menu.buttons);
+                }
+                (*Game.currentModeStruct) = (*Game.modeStructNext);
+            }
+            Game.specialState=0;
+            Game.currentMode= Game.nextMode;
+        }
     }
     else
     {
@@ -140,11 +180,16 @@ void update()
             else
                 updateLevel(&Game.currentModeStruct->level);
             break;
-        case MODE_MAINMENU:
-            //updateMenu(Game.currentModeStruct->menu);
-            break;
+        case MODE_MAINMENU :
+        case MODE_CREDITS:
         case MODE_INSTRUCTIONS:
-
+        case MODE_ONEPLAYER:
+        case MODE_MULTIPLAYERS:
+            if(Game.specialMode)
+                Game.specialMode = specialUpdateMenu(&Game.currentModeStruct->menu,
+                                                     &Game.specialState);
+            else
+                updateMenu(&Game.currentModeStruct->menu);
             break;
         default :
             break;
@@ -162,26 +207,19 @@ int handleEvent(const SDL_Event* event)
                 return 0;
             }
     }
-    if(windowEventHandler(event)) return 1;
+    windowEventHandler(event);
+    if(Game.transitionMode) return 1;
     switch (Game.currentMode)
     {
     case MODE_LEVEL:
         handleEventLevel(&(Game.currentModeStruct->level),event);
         break;
-    case MODE_MAINMENU:
-         handleEventMenu(&(Game.currentModeStruct->menu), event);
-        break;
-    case MODE_INSTRUCTIONS:
-         handleEventGoBack(Game.currentModeStruct->instruction.retour, event);
-         break;
+    case MODE_MAINMENU :
     case MODE_CREDITS:
-         handleEventGoBack(Game.currentModeStruct->credit.retour, event);
-         break;
+    case MODE_INSTRUCTIONS:
     case MODE_ONEPLAYER:
-        handleEventGoBackPlayer(Game.currentModeStruct->oneplayer.buttons, event);
-        break;
-    case MODE_TWOPLAYERS:
-        handleEventGoBackPlayer(Game.currentModeStruct->twoplayers.buttons, event);
+    case MODE_MULTIPLAYERS:
+        handleEventMenu(&(Game.currentModeStruct->menu), event);
         break;
     default :
         break;
@@ -195,15 +233,12 @@ void initGameAudio(){
 
 void initializeGame()
 {
-    char fakeParam[] = "fake";
-    char *fakeargv[] = { fakeParam, NULL };
-    int fakeargc = 1;
-    glutInit( &fakeargc, fakeargv);
     Game.windowWidth = 640;
     Game.windowHeight = 480;
     Game.fullscreen = 0;
     Game.currentMode = MODE_MAINMENU;
     Game.currentModeStruct = malloc(sizeof(ModeStruct));
+    Game.modeStructNext = malloc(sizeof(ModeStruct));
     loadConfig();
     initialize_window(Game.windowWidth,Game.windowHeight,Game.fullscreen);
     initGameAudio();
@@ -215,11 +250,10 @@ void initializeGame()
     {
         initJoystick(Game.joysticks+i,i);
     }
-    playAudioFadeIn(3,0.1);
     SDL_PauseAudio(0);
     initMainMenu(&(Game.currentModeStruct->menu));
-    //initLevel(&Game.currentModeStruct->level,2,2,0);
-    Game.specialMode = 0;
+    //initLevel(&Game.currentModeStruct->level,2,1,3);
+    Game.specialMode = 1;
     Game.specialState = 0;
     Game.transitionMode = 0;
 }
@@ -236,9 +270,6 @@ void game()
             loop = handleEvent(&event);
         }
         update();
-        glMatrixMode(GL_MODELVIEW);
-        glClearColor(0,0,0,0);
-        glClear(GL_COLOR_BUFFER_BIT);
         drawGame();
         SDL_GL_SwapBuffers();
         unsigned int delay = SDL_GetTicks() - startTime;
@@ -254,4 +285,61 @@ void loadConfig(){
 }
 void saveConfig(){
 
+}
+
+void transitionLeftMode(Mode nextMode){
+    Game.nextMode = nextMode;
+    switch(nextMode){
+    case MODE_LEVEL:
+        Game.specialMode = 1;
+        break;
+    case MODE_MAINMENU:
+        initMainMenu(&Game.modeStructNext->menu);
+        break;
+    case MODE_MULTIPLAYERS:
+        initMultiPlayers(&Game.modeStructNext->menu);
+        break;
+    case MODE_ONEPLAYER:
+        initOnePlayer(&Game.modeStructNext->menu);
+        break;
+    case MODE_INSTRUCTIONS:
+        initInstruction(&Game.modeStructNext->menu);
+        break;
+    case MODE_CREDITS:
+        initCredits(&Game.modeStructNext->menu);
+        break;
+    default:
+        break;
+    }
+    Game.transitionMode = 1;
+    Game.specialState = 0;
+    Game.transitionSpeed = 0.1;
+}
+void transitionRightMode(Mode nextMode){
+    Game.nextMode = nextMode;
+    switch(nextMode){
+    case MODE_LEVEL:
+        Game.specialMode = 1;
+        break;
+    case MODE_MAINMENU:
+        initMainMenu(&Game.modeStructNext->menu);
+        break;
+    case MODE_MULTIPLAYERS:
+        initMultiPlayers(&Game.modeStructNext->menu);
+        break;
+    case MODE_ONEPLAYER:
+        initOnePlayer(&Game.modeStructNext->menu);
+        break;
+    case MODE_INSTRUCTIONS:
+        initInstruction(&Game.modeStructNext->menu);
+        break;
+    case MODE_CREDITS:
+        initCredits(&Game.modeStructNext->menu);
+        break;
+    default:
+        break;
+    }
+    Game.transitionMode = -1;
+    Game.specialState = 0;
+    Game.transitionSpeed = 0.1;
 }

@@ -80,6 +80,23 @@ void initControls(){
     controls[CONTROLMOUSE][ROTATELEFTSTOP].type =
     controls[CONTROLMOUSE][ROTATERIGHT].type =
     controls[CONTROLMOUSE][ROTATERIGHTSTOP].type= SDL_MOUSEMOTION;
+
+    controls[CONTROLJOYSTICK][ROTATERIGHT].type = SDL_JOYBUTTONDOWN;
+    controls[CONTROLJOYSTICK][ROTATERIGHTSTOP].type = SDL_JOYBUTTONUP;
+    controls[CONTROLJOYSTICK][ROTATERIGHT].jbutton.button =
+    controls[CONTROLJOYSTICK][ROTATERIGHTSTOP].jbutton.button = 2;
+    controls[CONTROLJOYSTICK][ROTATELEFT].type = SDL_JOYBUTTONDOWN;
+    controls[CONTROLJOYSTICK][ROTATELEFTSTOP].type = SDL_JOYBUTTONUP;
+    controls[CONTROLJOYSTICK][ROTATELEFT].jbutton.button =
+    controls[CONTROLJOYSTICK][ROTATELEFTSTOP].jbutton.button = 1;
+    controls[CONTROLJOYSTICK][BACKWARD].type = SDL_JOYBUTTONDOWN;
+    controls[CONTROLJOYSTICK][BACKWARDSTOP].type = SDL_JOYBUTTONUP;
+    controls[CONTROLJOYSTICK][BACKWARD].jbutton.button =
+    controls[CONTROLJOYSTICK][BACKWARDSTOP].jbutton.button = 0;
+    controls[CONTROLJOYSTICK][FORWARD].type = SDL_JOYBUTTONDOWN;
+    controls[CONTROLJOYSTICK][FORWARDSTOP].type = SDL_JOYBUTTONUP;
+    controls[CONTROLJOYSTICK][FORWARD].jbutton.button =
+    controls[CONTROLJOYSTICK][FORWARDSTOP].jbutton.button = 3;
 }
 
 void initJoystick(Joystick *input,int numeroJoystick)

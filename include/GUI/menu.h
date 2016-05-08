@@ -4,6 +4,7 @@
 #include "Object2D/geometry.h"
 #include "Object2D/Color.h"
 #include "mode.h"
+#include "Object2D/hovercraft.h"
 
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
@@ -16,7 +17,11 @@
 #endif
 
 typedef enum MAINMENUBTN {ONEPLAYERS,TWOPLAYERS,INSTRUCTIONS,CREDITS,EXIT_GAME,MAINMENUNBBUTTONS} MAINMENUBTN;
-typedef enum LEVELBTN {LEVEL1,LEVEL2,LEVEL3,RETOUR,LEVELNBBUTTONS} LEVELBTN;
+typedef enum LEVELBTN {LEVEL1,LEVEL2,RETOUR,LEVELNBBUTTONS} LEVELBTN;
+typedef enum JOUEURS {JOUEURSNB2_1,JOUEURSNB2_2,JOUEURSNB3_1,JOUEURSNB3_2,
+                      JOUEURSNB4_1,JOUEURSNB4_2,RETOURMULTI, MULTINBBUTTONS} MULTIBTN;
+typedef enum Mode {MODE_MAINMENU=0, MODE_ONEPLAYER, MODE_MULTIPLAYERS,
+                   MODE_INSTRUCTIONS, MODE_CREDITS, MODE_LEVEL, NBMODES} Mode;
 
 typedef struct Button {
     char* label;
@@ -31,57 +36,31 @@ typedef struct Button {
 } Button;
 
 typedef struct Menu{
+    Map map;
+    int indice;
+    int nbBots;
+    BotHovercraft* bots;
     Button* buttons;
+    int nbButtons;
     GLuint titleTextureID;
+    GLuint imageTextureID;
 } Menu;
 
-typedef struct Instruction{
-    Button* retour;
-    GLuint titleTextureID;
-} Instruction;
 
-typedef struct Credits{
-    Button* retour;
-    GLuint titleTextureID;
-} Credits;
-
-typedef struct OnePlayer{
-    Button* buttons;
-    GLuint titleTextureID;
-} OnePlayer;
-
-typedef struct TwoPlayers{
-    Button* buttons;
-    GLuint titleTextureID;
-} TwoPlayers;
-
-
-
-void un_joueur();
-void deux_joueurs();
-void instructions();
-void credits();
-void quitter();
-void goback();
-void initMenu(Menu* menu, const char* titleFilename, int nbButtons);
+void initMenu(Menu* menu, const char* titlefilename, int nbButtons, const char* imagefilename);
 void initMainMenu(Menu* menu);
-void drawMenu(const Menu *m);
+void initCredits(Menu* menuC);
+void initInstruction(Menu* menuI);
+void initMultiPlayers(Menu* menuMP);
+void initOnePlayer(Menu* menuOP);
+
+void drawMenu(const Menu *m, int viewportX);
+void specialdrawMenu(const Menu *m, float state, int viewportX);
+int specialUpdateMenu(const Menu *m, float *state);
+void drawTwoMenu(const Menu *m, const Menu *m2, int viewportX1, int viewportX2);
+void updateMenu(Menu *m);
 Button makeButton(char *label, Bounds6F bounds, Color4f fore, Color4f back, void (*clickHandle)(void));
+void vBitmapOutput(int x, int y, char *string, void *font);
 void handleEventMenu(Menu *m, const SDL_Event *event);
-
-void initOnePlayer(OnePlayer* op, const char* filename, int nbButtons);
-void drawOnePlayer(const OnePlayer* tp);
-
-void initTwoPlayers(TwoPlayers* tp, const char* filename, int nbButtons);
-void drawTwoPlayers(const TwoPlayers* tp);
-
-void initInstructions(Instruction* i, const char* filename);
-void drawInstructions(const Instruction* i);
-
-void initCredits(Credits* c, const char* filename);
-void drawCredits(const Credits* c);
-
-void handleEventGoBack(Button* retour, const SDL_Event* event);
-void handleEventGoBackPlayer(Button* retour, const SDL_Event* event);
 
 #endif

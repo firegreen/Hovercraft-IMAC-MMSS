@@ -50,8 +50,9 @@ void initHovercraft(Hovercraft* hovercraft, const Map *map, unsigned int id,
 void initBotHovercraft(BotHovercraft *hovercraft, const Map* map, float error,
                        Point2D viewLeftTop, float viewWidth, float viewHeight);
 void drawHovercraft(const Hovercraft* hovercraft);
+void drawMiniHovercraft(const Hovercraft* hovercraft);
 void updateHovercraft(Hovercraft* hovercraft);
-void updateBotHovercraft(BotHovercraft* hovercraft, Chained_Object *objects);
+void updateBotHovercraft(BotHovercraft* hovercraft, Chained_Object *objects, Chained_Object *target);
 void giveGoalToBot(BotHovercraft* hovercraft, Point2D goal);
 int handleEventHovercraft(Hovercraft* hovercraft, const SDL_Event* e);
 

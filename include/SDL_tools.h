@@ -29,6 +29,7 @@ struct {
 
 void resize_handler(float width, float height);
 void reloadGLrepere();
+void loadCustomViewport(int x, int y, int width, int height);
 void initialize_window(float width, float height, unsigned char fullscreen);
 int windowEventHandler(const SDL_Event* event);
 

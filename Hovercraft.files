@@ -1,5 +1,4 @@
 include/GUI/level.h
-include/GUI/mode.h
 include/Mapping/camera.h
 include/Mapping/map.h
 include/Mapping/quadTree.h
@@ -13,7 +12,6 @@ include/SDL_tools.h
 include/GUI/menu.h
 include/GUI/control.h
 src/GUI/level.c
-src/GUI/mode.c
 src/GUI/menu.c
 src/Mapping/camera.c
 src/Mapping/map.c
@@ -27,20 +25,16 @@ src/textures.c
 src/main.c
 src/SDL_tools.c
 src/GUI/control.c
+src/GUI/menu.c
 Makefile
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-map1.txt
-=======
-src/GUI/menu.c
->>>>>>> master
-=======
-src/GUI/menu.c
->>>>>>> menu
-=======
+map/0
 map/1
 map/2
+map/3
+map/4
+map/5
+map/test
 include/audios.h
 src/audios.c
->>>>>>> bbd7ce754856a5c5c4835ff8e713b1ff856884f8
+audios
+textures

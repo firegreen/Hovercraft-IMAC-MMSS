@@ -8,7 +8,6 @@ typedef enum { CONTROLKEYBOARD1=0, CONTROLKEYBOARD2, CONTROLKEYBOARD3,
                CONTROLMOUSE, CONTROLJOYSTICK ,NBCONTROLS} ControlID;
 typedef enum { RIGHTBUTTON =0, LEFTBUTTON, WHEELUP, WHEELDOWN, NBBUTTONS } MouseButton;
 
-
 typedef struct Mouse{
     unsigned char isPressed[NBBUTTONS];
     Point2D originPressedPos;

@@ -59,13 +59,28 @@ void putObjectToNodeChild(Node* node, struct Object* object, Point2D position){
 
 Chained_Object* makeChainedObject(struct Object* object, Chained_Object *next, Point2D position){
     Chained_Object* co;
-    co = malloc(1 * sizeof(*co));
+    co = malloc(sizeof(Chained_Object));
     if(co!=NULL){
         co->next = next;
         co->object = object;
         co->position = position;
     }
     return co;
+}
+
+void freeAllChaineObject(Chained_Object **object){
+    if(*object!=NULL){
+        Chained_Object* next,*nnext;
+        next  = (*object)->next;
+        while(next!=NULL){
+            nnext = next->next;
+            freeObject(&next->object);
+            free(next);
+            next = nnext;
+        }
+    }
+    free(*object);
+    *object=NULL;
 }
 
 void addObjectToNode(Node* node, struct Object* object, Point2D position){

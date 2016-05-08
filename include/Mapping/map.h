@@ -14,7 +14,7 @@
 #include "quadTree.h"
 
 typedef enum READERROR { EOFREACHED, BADFORMATMAP,BADFORMATOBJECT, BADFORMATSHAPE, BADFORMATEFFECT,
-                         FILENOTEXIST, NONEERROR } ReadError;
+                         FILENOTEXIST, BADFORMATITEM, NONEERROR } ReadError;
 
 typedef struct Item {
     Object object;
@@ -25,8 +25,12 @@ typedef struct Map {
   float width, height;
   Bounds4P bounds;
   struct Chained_Object* objects;
+  struct Chained_Object* items;
+  struct Chained_Object* lastitem;
+  int nbcurrentItem;
   QuadTree tree;
   Object physicalBounds;
+  int audioID;
   Color3f color;
   float Bcolorevolution;
   float Gcolorevolution;
@@ -36,15 +40,21 @@ typedef struct Map {
   Item* potentialItem;
   Item specialItem;
   float itemState;
+  float time;
 } Map;
 
-void initMap(Map *map, float width, float height, float frottement, int textureID);
+void initMap(Map *map, float width, float height, float frottement, int textureID, int audioID, float time);
+void freeMap(Map **map);
+void freeMap2(Map *map);
 void initMapItems(Map *map, int nbItems);
 void addObjectToMap(Map *map, Object* o, Point2D position);
 void setItem(Map* map, Item item, int indice);
+void addRandomItem(Map* map);
+void addItem(Map* map, int i);
 void updateMap(Map *map);
 void applyFrottement(const Map* map, Object* o);
 void drawMap(const Map* map);
+void drawMiniMap(const Map* map);
 void readFile(Map *m, char* path, int *error);
 
 #endif

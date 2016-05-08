@@ -1,32 +1,101 @@
-texture:7 frottement:0.03 largeur:500 hauteur:500
-nbobstacles:3
+texture:13 frottement:0.03 largeur:500 hauteur:500 audio:7 time:40000
+nbobstacles:16 nbitems:2
 obstacles
-nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(30,-100)
+nbformes:6 nbeffets:1 vie:1 rayoncolision:200 statique:1 force:0 incassable:1 position:(0,20)
 formes
-type:p nbpoints:3 couleur:(1,0.9,1,1) rempli:1 texture:5 nbtexpoints:3
-points
-(-10,10) (0,0)
-(10,-10) (0.25,0.25)
-(10,10) (0.25,0)
+type:r topleft:(-50,10) size:(40,10) couleur:(1,0.9,1,1) rempli:1 texture:15
+type:r topleft:(0,10) size:(40,10) couleur:(1,0.9,1,1) rempli:1 texture:15
+type:r topleft:(40,10) size:(15,40) couleur:(1,0.9,1,1) rempli:1 texture:15
+type:r topleft:(40,-20) size:(15,15) couleur:(1,0.9,1,1) rempli:1 texture:15
+type:r topleft:(-50,-30) size:(105,10) couleur:(1,0.9,1,1) rempli:1 texture:15
+type:r topleft:(-50,10) size:(15,40) couleur:(1,0.9,1,1) rempli:1 texture:15
 effets
 type:r resistance:40 rebond:1
-nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(100,-60)
+nbformes:2 nbeffets:1 vie:1 rayoncolision:200 statique:1 force:0 incassable:1 position:(80,20)
 formes
-type:r topleft:(-50,10) size:(100,20) couleur:(1,0.9,1,1) rempli:1 texture:5
+type:r topleft:(0,10) size:(100,10) couleur:(1,0.9,1,1) rempli:1 texture:15
+type:r topleft:(50,10) size:(15,100) couleur:(1,0.9,1,1) rempli:1 texture:15
 effets
 type:r resistance:40 rebond:1
-nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(90,-100)
+nbformes:2 nbeffets:1 vie:1 rayoncolision:30 statique:1 force:0 incassable:1 position:(-30,-20)
 formes
-type:r topleft:(-50,10) size:(100,20) couleur:(1,0.9,1,1) rempli:1 texture:5
+type:r topleft:(-50,10) size:(20,20) couleur:(1,0.9,1,1) rempli:1 texture:15
+type:r topleft:(50,10) size:(20,20) couleur:(1,0.9,1,1) rempli:1 texture:15
+effets
+type:r resistance:40 rebond:0.2
+nbformes:2 nbeffets:1 vie:1 rayoncolision:100 statique:1 force:0 incassable:1 position:(-220,-90)
+formes
+type:r topleft:(-20,10) size:(50,10) couleur:(1,0.9,1,1) rempli:1 texture:15
+type:r topleft:(50,10) size:(15,50) couleur:(1,0.9,1,1) rempli:1 texture:15
+effets
+type:r resistance:40 rebond:0.2
+nbformes:1 nbeffets:0 vie:1 rayoncolision:100 statique:1 force:0 incassable:1 position:(-40,20)
+formes
+type:r topleft:(0,0) size:(80,30) couleur:(1,0.9,1,1) rempli:1 texture:17 adapter:0
+effets
+nbformes:1 nbeffets:1 vie:1 rayoncolision:90 statique:0 force:0 incassable:1 position:(-40,-60)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:0 force:0 incassable:1 position:(80,120)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:0 force:0 incassable:1 position:(-130,40)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:0 force:0 incassable:1 position:(-100,90)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:0 force:0 incassable:1 position:(100,90)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:0 force:0 incassable:1 position:(0,200)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:0 force:0 incassable:1 position:(-180,200)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:0 force:0 incassable:1 position:(40,-200)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:0 force:0 incassable:1 position:(-30,250)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:0 force:0 incassable:1 position:(-200,-210)
+formes
+type:r topleft:(0,0) size:(65,35)  couleur:(0.9,1,1,1) rempli:1 texture:14
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:80 statique:1 force:0 incassable:1 position:(200,180)
+formes
+type:c rayon:30 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:28
 effets
 type:r resistance:40 rebond:1
-nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:0 force:0 incassable:1 position:(-120,0)
+items
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:0 freq:0.005
 formes
-type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+type:r topleft:(-5,5) size:(12,12) couleur:(1,1,1,1) rempli:1 texture:11
 effets
-type:r resistance:40 rebond:1.2
-nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(100,80)
+type:p valeur:20
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:0 freq:0.01
 formes
-type:c rayon:40 centre:(0,0) couleur:(0.65,0.35,0.2,1) rempli:1 texture:5
+type:r topleft:(-5,5) size:(12,12) couleur:(1,1,1,1) rempli:1 texture:12
 effets
-type:r resistance:40 rebond:1.2
+type:p valeur:10

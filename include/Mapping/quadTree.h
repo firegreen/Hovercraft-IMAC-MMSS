@@ -29,6 +29,7 @@ typedef struct QuadTree{
 Node* makeNode(const Bounds2P* bounds);
 QuadTree* makeTree(const struct Map* map);
 Chained_Object* makeChainedObject(struct Object* object, Chained_Object *next, Point2D position);
+void freeAllChaineObject(struct Chained_Object** object);
 void addObjectToTree(QuadTree* tree, struct Object* object, Point2D position);
 Chained_Object* getNearestObjects(QuadTree* tree, Point2D p);
 

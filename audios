@@ -1,4 +1,11 @@
-3
+10
 "sons/hovercraft.wav" repeat 100 //1
 "sons/sea_theme.wav" repeat 100
 "sons/stardust_theme.wav" repeat 100//3
+"sons/festival.wav" repeat 100
+"sons/battle.wav" repeat 100 //5
+"sons/lets_go.wav" norepeat 100
+"sons/map1.wav" repeat 100
+"sons/map2.wav" repeat 100 //8
+"sons/maintitle1.wav" repeat 100 
+"sons/maintitle2.wav" repeat 60 //10

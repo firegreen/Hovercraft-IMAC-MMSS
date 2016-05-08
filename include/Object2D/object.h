@@ -13,16 +13,18 @@
 #endif
 
 
-typedef enum EFFECT_TYPE {MAX_SPEED, ACCELERATION, REBOUND, SPEED, POINTSMODIF} EFFECT_TYPE;
+typedef enum EFFECT_TYPE {MAX_SPEED, ACCELERATION,
+                          REBOUND, SPEED, POINTSMODIF, FESTIVAL} EFFECT_TYPE;
 typedef enum SHAPE_TYPE {POLYGON, SEGMENT, CIRCLE} SHAPE_TYPE;
 
-
+struct Level;
 typedef union Effect {
   struct { int ammount; } points;
   struct { float acceleration_value;} acceleration;
   struct { float resistance; float rebound_value;} rebound;
   struct { float force_value;} force;
   struct { float max_speed_value; } maxSpeed;
+  struct { struct Level* level; } festival;
   /* and other...*/
 } Effect;
 
@@ -99,13 +101,18 @@ void removeModifications(Object *object, Modification **modif);
 void makeObject(Object* o, int nbEffect, int nbShape, float life, float colliderRadius,
                 unsigned char isStatic, float strenth, unsigned char isUnbreakable);
 void cpyObject(Object* o1, const Object* o2);
+void drawMiniShape(const Shape* shape);
 void drawShape(const Shape* shape);
 void drawShapeWithTexture(const Shape* shape);
+void drawMiniObject(const Object* object);
 void drawObject(const Object* object);
 void updateObject(Object* object);
+void freeObject(Object** o);
+
 
 int handleCollision(Object* o1, Object* o2);
 int collisionBetweenLineAndObject(Line l, const Object* o2, Intersection* intersect);
+int collisionBetweenObjectCollider(const Object* o1, const Object* o2);
 int collisionBetweenObject(const Object* o1, const Object* o2, Intersection* intersect);
 int collisionBetweenShapes(const Shape* shape1, Point2D p1, float angle1, Vector2D direction1,
                            const Shape* shape2, Point2D p2, float angle2,

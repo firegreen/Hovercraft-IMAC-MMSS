@@ -17,13 +17,18 @@ typedef struct Level{
   BotHovercraft* bots;
   unsigned long state;
   unsigned int indice;
+  Object* specialObject;
+  char festival;
+  int iWinner;
+  int ms;
 } Level;
 
 void specialDrawLevel(const Level* level, float state);
-int specialUpdateLevel(const Level* level, float* state);
+int specialUpdateLevel(Level* level, float* state);
 void drawLevel(const Level* level);
 void updateLevel(Level* level);
 void initLevel(Level* level, int mapid, int nbplayers, int nbBots);
+void activeFestival(Level* l);
 void handleEventLevel(Level* l, const SDL_Event* event);
 
 #endif

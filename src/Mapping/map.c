@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include "SDL_tools.h"
+#include "audios.h"
 #include "textures.h"
 
 #ifdef __APPLE__
@@ -26,13 +27,64 @@ void drawMap(const Map* map){
         map->physicalBounds.shapes->texturesPoints[i].y += 0.0005;
     }
     drawObject(&map->physicalBounds);
-    Chained_Object* current = map->objects;
+    Chained_Object* current = map->objects->next;
     while(current!=NULL){
         drawObject(current->object);
         current=current->next;
     }
     glPopMatrix();
 
+}
+void drawMiniMap(const Map* map){
+    glPushMatrix();
+    glColor4f(0.1,0.2,0.4,0.5);
+    drawObject(&map->physicalBounds);
+    glColor3f(1,1,1);
+    Chained_Object* current = map->objects->next;
+    while(current!=NULL){
+        drawMiniObject(current->object);
+        current=current->next;
+    }
+    glPopMatrix();
+
+}
+
+void addItem(Map* map, int i){
+    if(map->nbcurrentItem<60)
+    {
+        Object* newO = malloc(sizeof(Object));
+        cpyObject(newO,&map->potentialItem[i].object);
+        char ok = 0;
+        Chained_Object* co;
+        Intersection inter;
+
+        int cpt=0;
+        while(!ok){
+            co = map->objects;
+            ok = 1;
+            newO->x = (float)(rand()%(int)(map->bounds.rightBottom.x-map->bounds.leftBottom.x))
+                    + map->bounds.leftBottom.x;
+            newO->y = (float)(rand()%(int)(map->bounds.leftTop.y-map->bounds.rightBottom.y))
+                    + map->bounds.leftBottom.y;
+            newO->vx =5*((float)(rand()%2)-1);
+            newO->vy =5*((float)(rand()%2)-1);
+            while(co!=NULL){
+                ok = !(collisionBetweenObject(newO,co->object,&inter));
+                if(!ok) break;
+                co = co->next;
+            }
+            cpt++;
+            if(cpt>2){
+                freeObject(&newO);
+                return;
+            }
+        }
+        newO->vx = newO->vy = 0;
+        newO->vAngle = 1;
+        addObjectToMap(map,newO,makePoint(newO->x,newO->y));
+        map->items = makeChainedObject(newO,map->items,makePoint(newO->x,newO->y));
+        map->nbcurrentItem++;
+    }
 }
 
 void updateMap(Map *map){
@@ -51,21 +103,22 @@ void updateMap(Map *map){
     if(map->objects!=NULL){
         co = map->objects;
         while(co->next!=NULL){
-            co2 = co->next;
+            co2 = co->next->next;
             while(co2!=NULL){
-                handleCollision(co->object,co2->object);
+                handleCollision(co->next->object,co2->object);
                 co2 = co2->next;
             }
             if(co->next->object->life > 0){
-                updateObject(co->next->object);
                 applyFrottement(map,co->next->object);
+                updateObject(co->next->object);
+                co = co->next;
             }
             else{
                 coNext = co->next->next;
+                freeObject(&co->next->object);
                 free(co->next);
                 co->next = coNext;
             }
-            co = co->next;
         }
         co2 = map->objects->next;
         while(co2!=NULL){
@@ -73,36 +126,54 @@ void updateMap(Map *map){
             co2 = co2->next;
         }
         if(map->objects->object->life > 0){
+            applyFrottement(map,map->objects->object);
             updateObject(map->objects->object);
         }
         else{
             coNext = map->objects->next;
+            freeObject(&map->objects->object);
             free(map->objects);
             map->objects = coNext;
         }
-        applyFrottement(map,map->objects->object);
     }
-    int i = 0;
-    map->itemState += (float)rand()/(float)RAND_MAX+EPSILON;
-    float inc = 1./(float)map->nbItems;
-    for(;i<map->nbItems;i++){
-        if((map->potentialItem[i].freq+inc)>map->itemState && map->itemState>inc){
-            float x = (float)(rand()%(int)(map->bounds.rightBottom.x-map->bounds.leftBottom.x))
-                    + map->bounds.leftBottom.x;
-            float y = (float)(rand()%(int)(map->bounds.leftTop.y-map->bounds.rightBottom.y))
-                    + map->bounds.leftBottom.y;
-            Object* newO = malloc(sizeof(Object));
-            cpyObject(newO,&map->potentialItem[i].object);
-            newO->x = x;
-            newO->y = y;
-            addObjectToMap(map,newO,makePoint(newO->x,newO->y));
-            break;
+    if(map->items!=NULL){
+        Chained_Object* item = map->items;
+        while(item->next!=NULL){
+            if(item->next->object->effectDelays==NULL){
+                Chained_Object* tmp = item->next->next;
+                free(item->next);
+                item->next = tmp;
+            }
+            else{
+                if(item->next->object->angle>100){
+                    item->next->object->vAngle =-1.5;
+                    item->next->object->angle = 99;
+                }
+                else if(item->next->object->angle<60){
+                    item->next->object->vAngle =1.5;
+                    item->next->object->angle =61;
+                }
+                item = item->next;
+            }
         }
-        inc+=inc;
+        if(map->items->object->effectDelays==NULL){
+            Chained_Object* tmp = map->items->next;
+            free(map->items);
+            map->items = tmp;
+        }
+        else{
+            if(map->items->object->angle>100){
+                map->items->object->vAngle =-1.5;
+                map->items->object->angle = 99;
+            }
+            else if(map->items->object->angle<60){
+                map->items->object->vAngle =1.5;
+                map->items->object->angle =61;
+            }
+        }
     }
-    if(map->itemState>1){
-        map->itemState = 0;
-    }
+    addRandomItem(map);
+    map->time -= MILLISECOND_PER_FRAME;
 }
 
 void applyFrottement(const Map *map, Object *o){
@@ -110,7 +181,7 @@ void applyFrottement(const Map *map, Object *o){
     o->vy -= o->vy * map->frottement;
 }
 
-void initMap(Map* map, float width, float height, float frottement, int textureID){
+void initMap(Map* map, float width, float height, float frottement, int textureID, int audioID, float time){
     map->bounds = makeBounds4P(-width/2.,height/2.,width/2.,-height/2.);
     map->height = height;
     map->width = width;
@@ -132,14 +203,53 @@ void initMap(Map* map, float width, float height, float frottement, int textureI
     map->physicalBounds.effectDelays[0]=2;
     map->physicalBounds.effectsAtCollision[0]=e;
     map->physicalBounds.effectsTypesAtCollision[0]=REBOUND;
-    map->objects = makeChainedObject(&(map->physicalBounds),NULL,makePoint(0,0));
+    map->objects=NULL;
+    map->items = NULL;
+    addObjectToMap(map,&(map->physicalBounds),makePoint(0,0));
     map->state=0;
     map->itemState = 0;
+    map->time = time;
+    map->audioID = audioID;
+    map->lastitem = NULL;
+    map->nbcurrentItem = 0;
+    playAudioFadeIn(audioID,0.1);
 }
 
 void initMapItems(Map* map, int nbItems){
     map->nbItems = nbItems;
     map->potentialItem = malloc(sizeof(Item) * nbItems);
+}
+
+void freeMap(Map** map){
+
+    freeAllChaineObject(&(*map)->objects);
+    freeAllChaineObject(&(*map)->items);
+    stopAudioFadeOut((*map)->audioID,2);
+
+    free(*map);
+    *map = NULL;
+}
+
+void freeMap2(Map* map){
+    freeAllChaineObject(&map->objects);
+    freeAllChaineObject(&map->items);
+    stopAudioFadeOut(map->audioID,2);
+}
+
+void addRandomItem(Map *map){
+    int i = 0;
+    map->itemState += (float)rand()/(float)RAND_MAX+EPSILON;
+    float inc = 1./(float)map->nbItems;
+    for(;i<map->nbItems;i++){
+        if((map->potentialItem[i].freq+inc)>map->itemState && map->itemState>inc){
+            addItem(map,i);
+            break;
+        }
+        inc+=inc;
+    }
+    if(map->itemState>1){
+        map->itemState = 0;
+    }
 }
 
 void setItem(Map *map, Item item, int indice){
@@ -148,25 +258,25 @@ void setItem(Map *map, Item item, int indice){
 }
 
 void addObjectToMap(Map *map, struct Object *o, Point2D position){
-    static int cpt = 0; cpt++;
     if(map->objects==NULL)
-    {
         map->objects = makeChainedObject(o,NULL,position);
-        return;
+    else{
+        Chained_Object* co = map->objects;
+        while(co->next!=NULL)
+            co = co->next;
+        co->next = makeChainedObject(o,NULL,position);
     }
-    Chained_Object* current = map->objects;
-    while(current->next!=NULL){
-        current = current->next;
-    }
-    current->next = makeChainedObject(o,NULL,position);
 }
 
 void readFile(Map* map, char* path, int* error)
 {
-    int i,j,k,iTex;
+    int i,j,k,iTex,adapter;
     int textureID;
-    int nbObstacles, nbShapes, nbEffects, nbPoints, nbTexPoints, nbItems;
+    int nbObstacles, nbShapes, nbEffects,
+            nbPoints, nbTexPoints, nbItems;
     int full;
+    int audioID;
+    float time;
     float frottement, freq;
     float life, radius, strength;
     int isStatic, isUnbreakable;
@@ -198,19 +308,18 @@ void readFile(Map* map, char* path, int* error)
     }
 
     readLine(strin,BUFSIZE,fp);
-    if(sscanf(strin, "texture:%d frottement:%f largeur:%f hauteur:%f",
-              &textureID,&frottement,&size.x,&size.y)<4){
+    if(sscanf(strin, "texture:%d frottement:%f largeur:%f hauteur:%f audio:%d time:%f",
+              &textureID,&frottement,&size.x,&size.y,&audioID,&time)<6){
         *error = BADFORMATMAP;
         return;
     }
-    initMap(map, size.x, size.y, frottement, textureID);
+    initMap(map, size.x, size.y, frottement, textureID,audioID,time);
     readLine(strin,BUFSIZE,fp);
     if(sscanf(strin, "nbobstacles:%d nbitems:%d", &nbObstacles, &nbItems)<2)
     {
         *error = BADFORMATMAP;
         return;
     }
-
     readLine(strin,BUFSIZ,fp);
     memset(strincmp,0,BUFSIZE/8);
     if(sscanf(strin,"%s",strincmp)<1)
@@ -275,9 +384,10 @@ void readFile(Map* map, char* path, int* error)
                                           getTextureHeight(textureID)/ratioY);
                 break;
             case 'r':
-                if(sscanf(strin+7,"topleft:(%f,%f) size:(%f,%f) couleur:(%f,%f,%f,%f) rempli:%d texture:%d",
+                adapter=1;
+                if(sscanf(strin+7,"topleft:(%f,%f) size:(%f,%f) couleur:(%f,%f,%f,%f) rempli:%d texture:%d adapter:%d",
                           &(pos.x),&(pos.y),&(size.x),&(size.y),&(color.r),&(color.g),&(color.b),&(color.a),
-                          &full,&textureID)<9)
+                          &full,&textureID,&adapter)<9)
                 {
                     *error = BADFORMATSHAPE;
                     return;
@@ -287,7 +397,7 @@ void readFile(Map* map, char* path, int* error)
                 else
                     makeRectangleWithTexture(o->shapes+j,pos.x,pos.y,size.x,size.y,color,
                                             getTexture(textureID), getTextureWidth(textureID)/ratioX,
-                                            getTextureHeight(textureID)/ratioY,1);
+                                            getTextureHeight(textureID)/ratioY,adapter);
 
               break;
             case 'p':
@@ -304,16 +414,16 @@ void readFile(Map* map, char* path, int* error)
                 readLine(strin,BUFSIZ,fp);
                 if(sscanf(strin,"%s",strincmp)<1)
                 {
-                    *error = BADFORMATMAP;
+                    *error = BADFORMATSHAPE;
                     return;
                 }
                 if(strcmp(strincmp,"points"))
                 {
-                    *error = BADFORMATMAP;
+                    *error = BADFORMATSHAPE;
                     return;
                 }
                 iTex=0;
-                for(k=0; k<o->shapes->spec.polygon.nbPoints; k++){
+                for(k=0; k<o->shapes[j].spec.polygon.nbPoints; k++){
                    readLine(strin,BUFSIZ,fp);
                    texpos.x=-1;
                    if(sscanf(strin,"(%f,%f) (%f,%f)",&(pos.x),&(pos.y),&texpos.x,&texpos.y)<2)
@@ -498,7 +608,7 @@ void readFile(Map* map, char* path, int* error)
                     return;
                 }
                 iTex=0;
-                for(k=0; k<item.object.shapes->spec.polygon.nbPoints; k++){
+                for(k=0; k<item.object.shapes[j].spec.polygon.nbPoints; k++){
                    readLine(strin,BUFSIZ,fp);
                    texpos.x=-1;
                    if(sscanf(strin,"(%f,%f) (%f,%f)",&(pos.x),&(pos.y),&texpos.x,&texpos.y)<2)

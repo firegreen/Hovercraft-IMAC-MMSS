@@ -23,6 +23,7 @@ void updateViewOfHovercraft(struct Hovercraft* hovercraft);
 void applyCameraTransform(const Camera* c);
 void zoomMinus(Camera* c);
 void zoomPlus(Camera* c);
+void zoom(Camera* c, float scale);
 void getMousePositionInCamera(const Camera* c, const SDL_Event *mouseEvent, int* x, int* y);
 void getMousePositionInGL(const Camera* c, const SDL_Event *mouseEvent, float *x, float *y);
 

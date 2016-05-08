@@ -17,10 +17,6 @@ typedef enum { MAINAUDIO1=0, MAINAUDIO2,MAINAUDIO3,ACCAUDIO,COLISIONAUDIO, NBAUD
 typedef union ModeStruct {
     Level level;
     Menu menu;
-    OnePlayer oneplayer;
-    TwoPlayers twoplayers;
-    Instruction instruction;
-    Credits credit;
 } ModeStruct;
 
 struct Game{
@@ -28,7 +24,7 @@ struct Game{
   Mode currentMode;
   Mode nextMode;
   ModeStruct* currentModeStruct;
-  ModeStruct* ModeStructNext;
+  ModeStruct* modeStructNext;
   int windowWidth, windowHeight;
   unsigned char fullscreen;
   unsigned char levelIsUnLocked[NBLEVELS];
@@ -37,6 +33,7 @@ struct Game{
   int audioIDs[NBAUDIOS];
   Joystick joysticks[NBJOYSTICK];
   float specialState;
+  float transitionSpeed;
   char specialMode;
   char transitionMode;
 } Game;
@@ -44,6 +41,8 @@ struct Game{
 void drawGame();
 void update();
 int handleEvent();
+void transitionRightMode(Mode nextMode);
+void transitionLeftMode(Mode nextMode);
 void initializeGame();
 void game();
 void loadConfig();

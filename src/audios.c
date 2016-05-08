@@ -42,6 +42,12 @@ void mixaudio(void * userData, Uint8 * stream, int len)
                     a->currentVolume = 0;
                     a->fadeOut = 0;
                     a->play = 0;
+                    int j=i;
+                    nbCurrentAudio--;
+                    for(;j<nbCurrentAudio;j++){
+                        currentAudios[j] = currentAudios[j+1];
+                    }
+                    a = currentAudios[i];
                 }
             }
             else if(a->fadeIn)
@@ -189,14 +195,8 @@ void stopAudioFadeOut(int id, float fadeValue){
     id--;
     if(id<0 || id>=nbAudios) return;
     if(audios[id].play){
-        audios[id].play = 0;
         audios[id].fadeIn = 0;
         audios[id].fadeOut = fadeValue;
-        nbCurrentAudio--;
-        int i=0;
-        for(;currentAudios[i]!=audios+id;i++);
-        for(;i<nbCurrentAudio;i++)
-            currentAudios[i] = currentAudios[i+1];
     }
 }
 

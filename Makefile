@@ -1,6 +1,5 @@
 CC = gcc
-CCFLAGS = -Wall -g
-#-std=c11
+CCFLAGS = -Wall -g -std=c11 -O2
 LDFLAGS  = -lm
 APP_BIN = hovercraft
 SRC_PATH = src
@@ -10,7 +9,7 @@ BIN_PATH = bin
 LIB_PATH = lib
 
 ifeq ($(OS),Windows_NT)
-    #CCFLAGS += -D WIN32
+    CCFLAGS += -D WIN32
     OBJ_PATH =obj/WIN32
     BIN_PATH =bin/WIN32
     LDFLAGS += -lSDL -lmingw32 -lSDLmain  -lSDL_image -lopengl32 -lglu32 -lfreeglut
@@ -27,20 +26,19 @@ else
     IF_N_EXIST = if [ ! -d
     THEN = ]; then
     ENDIF =; fi
-    ifeq ($(UNAME_S),Linux)
-	LDFLAGS += -lGL -lGLU -lglut -lSDL -lSDL_image
-	CCFLAGS += -D LINUX
-	OBJ_PATH =obj/UNIX
-	BIN_PATH =bin/UNIX
-    endif
     ifeq ($(shell uname),Darwin)
-	CCFLAGS += -I/opt/local/include
-	CCFLAGS += -I/Library/Frameworks/SDL.framework/Headers -I/Library/Frameworks/SDL_image.framework/Headers
-	LDFLAGS += `sdl-config --libs` `sdl-config --cflags`
-	CCFLAGS += -framework Cocoa -framework OpenGL -lSDL_image -lglut
-	CCFLAGS += -D OSX
-	OBJ_PATH =obj/OSX
-	BIN_PATH =bin/OSX
+        CCFLAGS += -I/opt/local/include
+        CCFLAGS += -I/Library/Frameworks/SDL.framework/Headers -I/Library/Frameworks/SDL_image.framework/Headers
+        LDFLAGS += `sdl-config --libs` `sdl-config --cflags`
+        CCFLAGS += -framework Cocoa -framework OpenGL -lSDL_image -lglut
+        CCFLAGS += -D OSX
+        OBJ_PATH =obj/OSX
+        BIN_PATH =bin/OSX
+    else
+        LDFLAGS += -lGL -lGLU -lglut -lSDL -lSDL_image
+        CCFLAGS += -D LINUX
+        OBJ_PATH =obj/UNIX
+        BIN_PATH =bin/UNIX
     endif
     CLEAN_CMD = rm $(OBJ_FILES) $(BIN_PATH)/$(APP_BIN)
 endif

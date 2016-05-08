@@ -1,0 +1,64 @@
+texture:7 frottement:0.03 largeur:1000 hauteur:800 audio:10 time:10000
+nbobstacles:10 nbitems:2
+obstacles
+nbformes:1 nbeffets:1 vie:1 rayoncolision:40 statique:1 force:0 incassable:1 position:(100,80)
+formes
+type:c rayon:40 centre:(0,0) couleur:(0.65,0.35,0.2,1) rempli:1 texture:5
+effets
+type:r resistance:40 rebond:1
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(140,0)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(-100,-60)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:1.2
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(80,120)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(50,100)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:1.2
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(0,200)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:0.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(200,180)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:2
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(200,-50)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:1.5
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(-200,-50)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:2
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(120,-150)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:1.8
+items
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:0 freq:0.01
+formes
+type:r topleft:(-5,5) size:(10,10) couleur:(1,1,1,1) rempli:1 texture:9
+effets
+type:p valeur:10
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:0 freq:0.005
+formes
+type:r topleft:(-5,5) size:(10,10) couleur:(1,1,1,1) rempli:1 texture:8
+effets
+type:p valeur:20

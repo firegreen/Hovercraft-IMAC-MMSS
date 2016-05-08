@@ -65,30 +65,28 @@ void updateViewOfHovercraft(Hovercraft* h){
 void applyCameraTransform(const Camera *c){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    float viewGLX1 = -GLREPERE, viewGLX2 = GLREPERE,
-            viewGLY1 = -GLREPERE * c->viewportWidth/c->viewportHeight,viewGLY2 = -viewGLY1;
-    gluOrtho2D(viewGLX1, viewGLX2,viewGLY1,viewGLY2);
+    gluOrtho2D(-window.orthoGLX, window.orthoGLX,-window.orthoGLY,window.orthoGLY);
     glViewport(c->viewportleftTop.x,c->viewportleftTop.y,c->viewportWidth,c->viewportHeight);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    float scaleX = (viewGLX2-viewGLX1)/(c->rightBottom.x - c->leftTop.x);
-    float scaleY = (viewGLY2-viewGLY1)/(c->leftTop.y - c->rightBottom.y);
+    float scaleX = (window.orthoGLX*2)/(c->rightBottom.x - c->leftTop.x);
+    float scaleY = (window.orthoGLY*2)/(c->leftTop.y - c->rightBottom.y);
     glScalef(scaleX,scaleY,1.);
     float translateX,translateY;
     if(c->leftTop.x < c->map->bounds.leftTop.x)
-        translateX = viewGLX1/scaleX - c->map->bounds.leftTop.x;
+        translateX = -window.orthoGLX/scaleX - c->map->bounds.leftTop.x;
     else if (c->rightBottom.x > c->map->bounds.rightBottom.x)
-        translateX = viewGLX2/scaleX - c->map->bounds.rightBottom.x;
+        translateX = window.orthoGLX/scaleX - c->map->bounds.rightBottom.x;
     else
-        translateX = viewGLX1/scaleX - c->leftTop.x;
+        translateX = -window.orthoGLX/scaleX - c->leftTop.x;
 
     if(c->leftTop.y > c->map->bounds.leftTop.y)
-        translateY = viewGLY2/scaleY - c->map->bounds.leftTop.y;
+        translateY = window.orthoGLY/scaleY - c->map->bounds.leftTop.y;
     else if (c->rightBottom.y < c->map->bounds.rightBottom.y)
-        translateY = viewGLY1/scaleY - c->map->bounds.rightBottom.y;
+        translateY = -window.orthoGLY/scaleY - c->map->bounds.rightBottom.y;
     else
-        translateY = viewGLY2/scaleY - c->leftTop.y;
+        translateY = window.orthoGLY/scaleY - c->leftTop.y;
 
     glTranslatef(translateX, translateY,0);
 }
@@ -110,6 +108,15 @@ void zoomPlus(Camera *c){
         c->leftTop.y-=10;
         c->rightBottom.y+=10;
     }
+}
+
+void zoom(Camera *c, float scale){
+    float width = c->rightBottom.x - c->leftTop.x;
+    float zoomW = width*scale/2.;
+    c->leftTop.x-=zoomW;
+    c->rightBottom.x+=zoomW;
+    c->leftTop.y+=zoomW;
+    c->rightBottom.y-=zoomW;
 }
 
 void getMousePositionInCamera(const Camera *c, const SDL_Event* mouseEvent, int *x, int *y){

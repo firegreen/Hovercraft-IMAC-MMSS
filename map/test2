@@ -1,0 +1,32 @@
+texture:7 frottement:0.03 largeur:700 hauteur:500
+nbobstacles:3
+obstacles
+nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(30,-100)
+formes
+type:p nbpoints:3 couleur:(1,0.9,1,1) rempli:1 texture:5 nbtexpoints:3
+points
+(-10,10) (0,0)
+(10,-10) (0.25,0.25)
+(10,10) (0.25,0)
+effets
+type:r resistance:40 rebond:1
+nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(100,-60)
+formes
+type:r topleft:(-50,10) size:(100,20) couleur:(1,0.9,1,1) rempli:1 texture:5
+effets
+type:r resistance:40 rebond:1
+nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(90,-100)
+formes
+type:r topleft:(-50,10) size:(100,20) couleur:(1,0.9,1,1) rempli:1 texture:5
+effets
+type:r resistance:40 rebond:1
+nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:0 force:0 incassable:1 position:(-120,0)
+formes
+type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
+effets
+type:r resistance:40 rebond:1.2
+nbformes:1 nbeffets:1 vie:1 rayoncolision:5 statique:1 force:0 incassable:1 position:(100,80)
+formes
+type:c rayon:40 centre:(0,0) couleur:(0.65,0.35,0.2,1) rempli:1 texture:5
+effets
+type:r resistance:40 rebond:1.2

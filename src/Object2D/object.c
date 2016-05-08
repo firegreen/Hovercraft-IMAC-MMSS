@@ -11,6 +11,7 @@
 #include <math.h>
 #include "Object2D/hovercraft.h"
 #include "textures.h"
+#include "GUI/level.h"
 
 #define M_PI 3.14159265358979323846
 
@@ -18,6 +19,9 @@
 
 void drawShape(const Shape* shape){
     int i;
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(shape->color.r,shape->color.g,shape->color.b,shape->color.a);
     switch (shape->type) {
     case POLYGON:
         if(shape->spec.polygon.full)
@@ -57,6 +61,50 @@ void drawShape(const Shape* shape){
         glEnd();
     default: break;
     }
+    glDisable(GL_BLEND);
+}
+
+void drawMiniShape(const Shape* shape){
+    int i;
+    switch (shape->type) {
+    case POLYGON:
+        if(shape->spec.polygon.full)
+            glBegin(GL_POLYGON);
+        else
+            glBegin(GL_LINE_LOOP);
+        for(i=0;i<shape->spec.polygon.nbPoints;i++)
+        {
+            glVertex2f(shape->spec.polygon.points[i].x,shape->spec.polygon.points[i].y);
+        }
+        glEnd();
+        break;
+    case CIRCLE:
+        if(shape->spec.circle.full){
+            glBegin(GL_TRIANGLE_FAN);
+            glVertex2f(shape->spec.circle.center.x,shape->spec.circle.center.y);
+        }
+        else
+            glBegin(GL_LINE_LOOP);
+        float cosInc = cosf((float)M_PI/10.);
+        float sinInc = sinf((float)M_PI/10.);
+        float x=1,y=0, oldX;
+        for(i=0; i<=20; i++)
+        {
+            glVertex2f(x*shape->spec.circle.radius+shape->spec.circle.center.x,
+                       y*shape->spec.circle.radius+shape->spec.circle.center.y);
+            oldX = x;
+            x = x*cosInc - y*sinInc;
+            y = oldX*sinInc + y*cosInc;
+        }
+        glEnd();
+        break;
+    case SEGMENT:
+        glBegin(GL_LINE);
+        glVertex2f(shape->spec.segment.p1.x,shape->spec.segment.p1.y);
+        glVertex2f(shape->spec.segment.p2.x,shape->spec.segment.p2.y);
+        glEnd();
+    default: break;
+    }
 }
 
 void drawShapeWithTexture(const Shape* shape){
@@ -70,6 +118,7 @@ void drawShapeWithTexture(const Shape* shape){
     glBindTexture(GL_TEXTURE_2D, shape->textureID);
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(shape->color.r,shape->color.g,shape->color.b,shape->color.a);
     switch (shape->type) {
     case POLYGON:
         glBegin(GL_POLYGON);
@@ -120,8 +169,40 @@ void drawObject(const Object* object){
     glRotatef(object->angle-90.,0,0,1.);
     for(;i<object->nbShapes;i++)
     {
-        glColor3f(object->shapes[i].color.r,object->shapes[i].color.g,object->shapes[i].color.b);
         drawShapeWithTexture(object->shapes+i);
+    }
+    glPopMatrix();
+}
+
+void drawMiniObject(const Object* object){
+    int i = 0;
+    glPushMatrix();
+    glTranslatef(object->x,object->y,0);
+    if(object->nbEffect>0){
+        switch (object->effectsTypesAtCollision[0]) {
+        case REBOUND:
+            glColor3f(0.5,0.35,0.6);
+            break;
+        case POINTSMODIF:
+            if(object->effectsAtCollision->points.ammount>0)
+                glColor3f(0.2,1,0.6);
+            else
+                glColor3f(1,0.1,0.3);
+            break;
+        case ACCELERATION:
+            glColor3f(0.2,0.3,0.5);
+            break;
+        default:
+            glColor3f(0.5,0.7,0.43);
+            break;
+        }
+    }
+    else{
+        glColor4f(0.5,0.5,0.5,0.5);
+    }
+    for(;i<object->nbShapes;i++)
+    {
+        drawMiniShape(object->shapes+i);
     }
     glPopMatrix();
 }
@@ -550,8 +631,17 @@ int collisionBetweenShapes(const Shape *shape1, Point2D p1, float angle1, Vector
     return 0;
 }
 
+int collisionBetweenObjectCollider(const Object *o1, const Object *o2){
+    float distanceX = o1->x - o2->x;
+    float distanceY = o1->y - o2->y;
+    float radiusSum = o1->colliderRadius+o1->vx*o1->vx+o1->vy*o1->vy +
+                      o2->colliderRadius+o2->vx*o2->vx+o2->vy*o2->vy;
+    return distanceX*distanceX+distanceY*distanceY<radiusSum*radiusSum;
+}
+
 int collisionBetweenObject(const Object *o1, const Object *o2, Intersection *intersect){
     if(o1->vx*o1->vx + o1->vy*o1->vy > EPSILON || o1->vAngle>1){
+        if(!collisionBetweenObjectCollider(o1,o2)) return 0;
         int i,j;
         intersect->normal1 = makeVector(0,0);
         intersect->normal2 = makeVector(0,0);
@@ -791,6 +881,9 @@ int applyEffectToHovercraft(Modification *modif, Hovercraft *h){
     case POINTSMODIF:
         h->points += modif->effect.points.ammount;
         return 1;
+    case FESTIVAL:
+        activeFestival(modif->effect.festival.level);
+        return 1;
     default:
         return 0;
     }
@@ -826,4 +919,23 @@ void updateObject(Object *object){
 
     object->x += object->vx;
     object->y += object->vy;
+}
+
+void freeObject(Object **o){
+    free((*o)->effectDelays);
+    (*o)->effectDelays = NULL;
+    free((*o)->effectsAtCollision);
+    (*o)->effectsAtCollision = NULL;
+    free((*o)->effectsTypesAtCollision);
+    (*o)->effectsTypesAtCollision = NULL;
+    /*Modification* modi = (*o)->receivedModifs;
+    if(modi!=NULL){
+        while(modi->next!=NULL){
+            free(modi);
+            modi = modi->next;
+        }
+        free((*o)->receivedModifs);
+    }*/
+    free(*o);
+    *o = NULL;
 }
