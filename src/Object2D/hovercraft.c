@@ -26,10 +26,10 @@ void initHovercraft(Hovercraft* hovercraft, const Map* map){
     makeObject(&(h_object),1,2,100,10,0,10,1);
     Color4f c;
     c = makeColor4f(1,0.9,0.3,1);
-    makeRectangleWithTexture(h_object.shapes,-3,4,6,8,c,getTexture(27),
-                             getTextureWidth(27),getTextureHeight(27),0);
-    makeCircleWithTexture(h_object.shapes+1,3,makePoint(0,3.8f),c,getTexture(28),
-               getTextureWidth(28),getTextureHeight(28));
+    makeRectangleWithTexture(h_object.shapes,-3,4,6,8,c,getTexture(38),
+                             getTextureWidth(38),getTextureHeight(38),0);
+    makeCircleWithTexture(h_object.shapes+1,3,makePoint(0,3.8f),c,getTexture(39),
+               getTextureWidth(39),getTextureHeight(39));
 
     Effect e;
     e.rebound.resistance = 100;

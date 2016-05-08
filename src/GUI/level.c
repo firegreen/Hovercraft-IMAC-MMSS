@@ -25,6 +25,7 @@ void drawView(const Level* l){
     glPushMatrix();
     applyCameraTransform(&l->hovercraft->view);
     drawMap(&l->map);
+    drawHovercraft(l->hovercraft);
     glPopMatrix();
     glPushMatrix();
 
@@ -99,6 +100,7 @@ void initLevel(Level *level, int mapid){
     }
     level->hovercraft = malloc(sizeof(Hovercraft));
     initHovercraft(level->hovercraft,&level->map);
+    level->endStart=0;
 }
 
 void drawLevel(const Level* level){

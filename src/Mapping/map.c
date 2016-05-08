@@ -21,6 +21,11 @@ char imagefile[100];
 
 void drawMap(const Map* map){
     glPushMatrix();
+    int i;
+    for(i=0;i<map->physicalBounds.shapes->nbTexturePoints;i++){
+        map->physicalBounds.shapes->texturesPoints[i].x+=0.001;
+        map->physicalBounds.shapes->texturesPoints[i].y+=0.0008;
+    }
     drawObject(&map->physicalBounds);
     Chained_Object* current = map->objects->next;
     while(current!=NULL){

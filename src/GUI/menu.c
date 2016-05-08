@@ -150,6 +150,8 @@ void initMenu(Menu* m, const char* titlefilename, int nbButtons, const char *ima
 void drawMenu(const Menu* m){
     int i;
     Bounds2P bTitle, bImage;
+    Bounds2P b = makeBounds2P(-window.orthoGLX,window.orthoGLY,window.orthoGLX,-window.orthoGLY);
+    drawTextureQuad(getTexture(13),&WHITE,&b);
     for(i=0;i<m->nbButtons;i++){
         drawButton(&(m->buttons[i]));
     }
@@ -200,7 +202,7 @@ void handleEventMenu(Menu *m, const SDL_Event *event){
 
 
 void initMainMenu(Menu* m){
-    initMenu(m,"images/titre.png",MAINMENUNBBUTTONS,NULL);
+    initMenu(m,"images/menu.png",MAINMENUNBBUTTONS,NULL);
     m->buttons[ONEPLAYERS]= makeButton("1 Joueur",makeBounds6F(-40.0,-14.0,80.0,13.0),BTNFORE,BTNPBACK,un_joueur);
     m->buttons[INSTRUCTIONS]= makeButton("Instructions",makeBounds6F(-40.0,-28.0,80.0,13.0),BTNFORE,BTNPBACK,instructions);
     m->buttons[CREDITS]= makeButton("Credits",makeBounds6F(-40.0,-42.0,80.0,13.0),BTNFORE,BTNPBACK,credits);

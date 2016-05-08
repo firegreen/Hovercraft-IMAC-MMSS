@@ -1,4 +1,4 @@
-29
+40
 "images/un.png" //1
 "images/deux.png"
 "images/trois.png"
@@ -24,7 +24,18 @@
 "images/mot2.png"
 "images/folie.png"
 "images/diamant.png"//25
+"images/coquillage.png"
+"images/tortue.png"
+"images/soleil.png"
+"images/iceberg.png"
+"images/banquise.png"//30
+"images/snow.png"
+"images/pingouin.png"
+"images/coquillage2.png"
+"images/etoile.png"
+"images/bonbon.png"//35
+"images/boule.png"
 "images/imac.png"
 "images/corps.png"
 "images/tete.png"
-"images/victoire.png"
+"images/victoire.png"//40
