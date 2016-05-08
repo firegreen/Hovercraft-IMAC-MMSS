@@ -1,4 +1,4 @@
-texture:7 frottement:0.03 largeur:700 hauteur:500 audio:7 time:60000
+texture:7 frottement:0.03 largeur:700 hauteur:500 audio:7 time:3000
 nbobstacles:13 nbitems:2
 obstacles
 nbformes:4 nbeffets:1 vie:1 rayoncolision:150 statique:1 force:0 incassable:1 position:(0,-20)
@@ -45,12 +45,12 @@ formes
 type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
 effets
 type:r resistance:40 rebond:1.2
-nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(80,120)
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(200,120)
 formes
 type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
 effets
 type:r resistance:40 rebond:1.5
-nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(50,100)
+nbformes:1 nbeffets:1 vie:1 rayoncolision:20 statique:0 force:0 incassable:1 position:(-50,100)
 formes
 type:c rayon:20 centre:(0,0) couleur:(0.9,1,1,1) rempli:1 texture:6
 effets

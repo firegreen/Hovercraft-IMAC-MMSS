@@ -7,25 +7,70 @@
 
 #define h_object h->physical_body
 
-void makeCamera(Camera *c, float width, float height, const Map* map){
+void makeCamera(Camera *c, float width, float height, const Map* map,
+                Point2D viewportLeftTop, unsigned int viewportWidth, unsigned int viewportHeight){
     c->leftTop = makePoint(-width/2.,height/2.);
     c->rightBottom = makePoint(width/2.,-height/2.);
     c->map = map;
+    c->viewportleftTop = viewportLeftTop;
+    c->viewportHeight = viewportHeight;
+    c->viewportWidth = viewportWidth;
 }
 
 void updateViewOfHovercraft(Hovercraft* h){
     float width = h->view.rightBottom.x - h->view.leftTop.x;
     float height = h->view.leftTop.y - h->view.rightBottom.y;
-    h->view.rightBottom.x = h_object.x + width/2.;
-    h->view.leftTop.x =  h_object.x - width/2.;
-
-    h->view.leftTop.y = h_object.y + height/2.;
-    h->view.rightBottom.y = h_object.y - height/2.;
+    float borne = h->max_linear_speed/2.;
+    float margeDX,margeDY;
+    float a,b;
+    float power = (h->moteur - h->view.map->frottement)*1.5;
+    if(h_object.vx < borne && h_object.vx > -borne){
+        a = (- width * power/2.) / borne;
+        b = width/2.;
+    }
+    else{
+        a = (width * power) / borne;
+        b = (- width * power/2.) + width/2.
+                - (width * power);
+    }
+    margeDX =(a * fabs(h_object.vx) + b);
+    if(h_object.vy < borne && h_object.vy > -borne){
+        a = (- height * power/2.) / borne;
+        b = height/2.;
+    }
+    else{
+        a = (height * power) / borne;
+        b = (- height * power/2.) + height/2.
+                - (height * power);
+    }
+    margeDY = (a * fabs(h_object.vy) + b);
+    if(h_object.vx>0){
+        h->view.rightBottom.x = h_object.x + margeDX;
+        h->view.leftTop.x = h->view.rightBottom.x - width;
+    }
+    else{
+        h->view.leftTop.x = h_object.x - margeDX;
+        h->view.rightBottom.x = h->view.leftTop.x + width;
+    }
+    if(h_object.vy>0){
+        h->view.leftTop.y = h_object.y + margeDY;
+        h->view.rightBottom.y = h->view.leftTop.y - height;
+    }
+    else{
+        h->view.rightBottom.y = h_object.y - margeDY;
+        h->view.leftTop.y = h->view.rightBottom.y + height;
+    }
 }
 
 void applyCameraTransform(const Camera *c){
-    glMatrixMode(GL_MODELVIEW);
+    /*glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+    gluOrtho2D(-window.orthoGLX, window.orthoGLX,-window.orthoGLY,window.orthoGLY);
+    glViewport(c->viewportleftTop.x,c->viewportleftTop.y,c->viewportWidth,c->viewportHeight);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();*/
+    loadCustomViewport(c->viewportleftTop.x,c->viewportleftTop.y,c->viewportWidth,c->viewportHeight);
+
     float scaleX = (window.orthoGLX*2)/(c->rightBottom.x - c->leftTop.x);
     float scaleY = (window.orthoGLY*2)/(c->leftTop.y - c->rightBottom.y);
     glScalef(scaleX,scaleY,1.);
@@ -75,14 +120,26 @@ void zoom(Camera *c, float scale){
     c->rightBottom.y-=zoomW;
 }
 
-void getMousePositionInGL(const Camera *c, const SDL_Event *mouseEvent, float *x, float *y){
+void getMousePositionInCamera(const Camera *c, const SDL_Event* mouseEvent, int *x, int *y){
     Point2D camCenter;
-    camCenter.x = window.width/2;
-    camCenter.y = window.height/2;
+    camCenter.x = c->viewportleftTop.x + c->viewportWidth/2;
+    camCenter.y = c->viewportleftTop.y + c->viewportHeight/2;
     *x = mouseEvent->motion.x - camCenter.x;
     *y = (window.height - mouseEvent->motion.y) - camCenter.y;
-    *x *= window.orthoGLX/window.width;
-    *y *= window.orthoGLY/window.height;
+}
+
+void getMousePositionInGL(const Camera *c, const SDL_Event *mouseEvent, float *x, float *y){
+    int xInt,yInt;
+    getMousePositionInCamera(c,mouseEvent,&xInt,&yInt);
+    if(xInt<-c->viewportWidth/2 || xInt>c->viewportWidth/2 ||
+            yInt>c->viewportHeight/2 || yInt<-c->viewportHeight/2)
+    {
+        *x = 0;
+        *y = 0;
+        return;
+    }
+    *x = (float)xInt * window.orthoGLX/c->viewportWidth;
+    *y = (float)yInt * window.orthoGLY/c->viewportHeight;
     *x *= (c->rightBottom.x - c->leftTop.x)/window.orthoGLX;
     *y *= (c->leftTop.y - c->rightBottom.y)/window.orthoGLY;
     *x += (c->rightBottom.x + c->leftTop.x)/2;

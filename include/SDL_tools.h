@@ -25,6 +25,7 @@ struct {
   float height;
   float orthoGLX;
   float orthoGLY;
+  unsigned long option;
 } window;
 
 void resize_handler(float width, float height);

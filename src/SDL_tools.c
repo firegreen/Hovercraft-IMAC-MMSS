@@ -24,6 +24,13 @@ void resize_handler(float width, float height)
 }
 
 void reloadGLrepere(){
+#ifndef WIN32
+    if (SDL_SetVideoMode(window.width, window.height, BITS_PER_PIXEL, window.option) == NULL )
+    {
+        fprintf(stderr, "Couldn't set %fx%fx%d video mode: %s\n",window.width, window.height,BITS_PER_PIXEL,SDL_GetError());
+        exit(1);
+    }
+#endif
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-window.orthoGLX, window.orthoGLX, -window.orthoGLY, window.orthoGLY);
@@ -34,6 +41,13 @@ void reloadGLrepere(){
 
 
 void loadCustomViewport(int x, int y, int width, int height){
+#ifndef WIN32
+    if (SDL_SetVideoMode(window.width, window.height, BITS_PER_PIXEL, window.option) == NULL )
+    {
+        fprintf(stderr, "Couldn't set %fx%fx%d video mode: %s\n",window.width, window.height,BITS_PER_PIXEL,SDL_GetError());
+        exit(1);
+    }
+#endif
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-window.orthoGLX, window.orthoGLX, -window.orthoGLY, window.orthoGLY);
@@ -53,10 +67,10 @@ void initialize_window(float width, float height, unsigned char fullscreen)
 
     /* Clean up on exit, exit on window close and interrupt */
     atexit(SDL_Quit);
-    unsigned long option = SDL_GL_DOUBLEBUFFER | SDL_OPENGL | SDL_RESIZABLE
+    window.option = SDL_GL_DOUBLEBUFFER | SDL_OPENGL | SDL_RESIZABLE
             | (SDL_FULLSCREEN * fullscreen);
     /* The mouse isn't much use unless we have a display for reference */
-    if (SDL_SetVideoMode(width, height, BITS_PER_PIXEL, option) == NULL )
+    if (SDL_SetVideoMode(width, height, BITS_PER_PIXEL, window.option) == NULL )
     {
         fprintf(stderr, "Couldn't set %fx%fx%d video mode: %s\n",width,height,BITS_PER_PIXEL,SDL_GetError());
         exit(1);

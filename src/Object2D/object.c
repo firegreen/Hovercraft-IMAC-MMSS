@@ -16,6 +16,7 @@
 #define M_PI 3.14159265358979323846
 
 
+
 void drawShape(const Shape* shape){
     int i;
     glEnable (GL_BLEND);
@@ -40,10 +41,16 @@ void drawShape(const Shape* shape){
         }
         else
             glBegin(GL_LINE_LOOP);
+        float cosInc = cosf((float)M_PI/25.);
+        float sinInc = sinf((float)M_PI/25.);
+        float x=1,y=0, oldX;
         for(i=0; i<=50; i++)
         {
-            glVertex2f(cosf((float)i*2.*M_PI/50.)*shape->spec.circle.radius+shape->spec.circle.center.x,
-                       sinf((float)i*2.*M_PI/50.)*shape->spec.circle.radius+shape->spec.circle.center.y);
+            glVertex2f(x*shape->spec.circle.radius+shape->spec.circle.center.x,
+                       y*shape->spec.circle.radius+shape->spec.circle.center.y);
+            oldX = x;
+            x = x*cosInc - y*sinInc;
+            y = oldX*sinInc + y*cosInc;
         }
         glEnd();
         break;
@@ -78,10 +85,16 @@ void drawMiniShape(const Shape* shape){
         }
         else
             glBegin(GL_LINE_LOOP);
+        float cosInc = cosf((float)M_PI/10.);
+        float sinInc = sinf((float)M_PI/10.);
+        float x=1,y=0, oldX;
         for(i=0; i<=20; i++)
         {
-            glVertex2f(cosf((float)i*2.*M_PI/20.)*shape->spec.circle.radius+shape->spec.circle.center.x,
-                       sinf((float)i*2.*M_PI/20.)*shape->spec.circle.radius+shape->spec.circle.center.y);
+            glVertex2f(x*shape->spec.circle.radius+shape->spec.circle.center.x,
+                       y*shape->spec.circle.radius+shape->spec.circle.center.y);
+            oldX = x;
+            x = x*cosInc - y*sinInc;
+            y = oldX*sinInc + y*cosInc;
         }
         glEnd();
         break;
@@ -121,14 +134,19 @@ void drawShapeWithTexture(const Shape* shape){
         break;
     case CIRCLE:
         glBegin(GL_POLYGON);
+        float cosInc = cosf((float)M_PI/(6.*shape->nbTexturePoints));
+        float sinInc = sinf((float)M_PI/(6.*shape->nbTexturePoints));
+        float x=1,y=0, oldX;
         int j;
         for(j=0;j<shape->nbTexturePoints;j++){
             for(; i<=12*(j+1); i++)
             {
-                glTexCoord2f(cosf((float)i*2.*M_PI/(shape->nbTexturePoints*12.))*0.5+0.5,
-                             sinf((float)i*2.*M_PI/(shape->nbTexturePoints*12.))*0.5+0.5);
-                glVertex2f(cosf((float)i*2.*M_PI/(shape->nbTexturePoints*12.))*shape->spec.circle.radius+shape->spec.circle.center.x,
-                           sinf((float)i*2.*M_PI/(shape->nbTexturePoints*12.))*shape->spec.circle.radius+shape->spec.circle.center.y);
+                glTexCoord2f(x*0.5+0.5,y*0.5+0.5);
+                glVertex2f(x*shape->spec.circle.radius+shape->spec.circle.center.x,
+                        y*shape->spec.circle.radius+shape->spec.circle.center.y);
+                oldX = x;
+                x = x*cosInc - y*sinInc;
+                y = oldX*sinInc + y*cosInc;
             }
         }
         glEnd();
@@ -613,9 +631,17 @@ int collisionBetweenShapes(const Shape *shape1, Point2D p1, float angle1, Vector
     return 0;
 }
 
+int collisionBetweenObjectCollider(const Object *o1, const Object *o2){
+    float distanceX = o1->x - o2->x;
+    float distanceY = o1->y - o2->y;
+    float radiusSum = o1->colliderRadius+o1->vx*o1->vx+o1->vy*o1->vy +
+                      o2->colliderRadius+o2->vx*o2->vx+o2->vy*o2->vy;
+    return distanceX*distanceX+distanceY*distanceY<radiusSum*radiusSum;
+}
 
 int collisionBetweenObject(const Object *o1, const Object *o2, Intersection *intersect){
     if(o1->vx*o1->vx + o1->vy*o1->vy > EPSILON || o1->vAngle>1){
+        if(!collisionBetweenObjectCollider(o1,o2)) return 0;
         int i,j;
         intersect->normal1 = makeVector(0,0);
         intersect->normal2 = makeVector(0,0);
@@ -803,6 +829,8 @@ int handleCollision(Object *o1, Object *o2){
 
 int applyEffectToObject(Modification *modif, Object *o){
     float valueX,valueY;
+    /*for(i=0;i<o->nbShapes;i++)
+        o->shapes[i].color.r -= (0.5f/(float)modif->initialDelay);*/
     switch (modif->effectType) {
     case ACCELERATION:
         if(!o->isStatic){
@@ -853,6 +881,9 @@ int applyEffectToHovercraft(Modification *modif, Hovercraft *h){
     case POINTSMODIF:
         h->points += modif->effect.points.ammount;
         return 1;
+    case FESTIVAL:
+        activeFestival(modif->effect.festival.level);
+        return 1;
     default:
         return 0;
     }
@@ -892,11 +923,21 @@ void updateObject(Object *object){
 
 void freeObject(Object **o){
     free((*o)->effectDelays);
-    (*o)->effectDelays = NULL;
-    free((*o)->effectsAtCollision);
-    (*o)->effectsAtCollision = NULL;
-    free((*o)->effectsTypesAtCollision);
-    (*o)->effectsTypesAtCollision = NULL;
+    if((*o)->effectsTypesAtCollision!=NULL){
+        (*o)->effectDelays = NULL;
+        free((*o)->effectsAtCollision);
+        (*o)->effectsAtCollision = NULL;
+        free((*o)->effectsTypesAtCollision);
+        (*o)->effectsTypesAtCollision = NULL;
+    }
+    /*Modification* modi = (*o)->receivedModifs;
+    if(modi!=NULL){
+        while(modi->next!=NULL){
+            free(modi);
+            modi = modi->next;
+        }
+        free((*o)->receivedModifs);
+    }*/
     free(*o);
     *o = NULL;
 }

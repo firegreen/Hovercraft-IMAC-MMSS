@@ -1,5 +1,6 @@
 CC = gcc
-CCFLAGS = -Wall -g -std=c11 -O2
+CCFLAGS = -Wall -g -O2
+#-std=c11
 LDFLAGS  = -lm
 APP_BIN = hovercraft
 SRC_PATH = src

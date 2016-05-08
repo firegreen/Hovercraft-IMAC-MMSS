@@ -11,6 +11,7 @@
 
 #include "Object2D/geometry.h"
 #include "Object2D/object.h"
+#include "quadTree.h"
 
 typedef enum READERROR { EOFREACHED, BADFORMATMAP,BADFORMATOBJECT, BADFORMATSHAPE, BADFORMATEFFECT,
                          FILENOTEXIST, BADFORMATITEM, NONEERROR } ReadError;
@@ -20,15 +21,6 @@ typedef struct Item {
     float freq;
 } Item;
 
-struct Chained_Object{
-    Object* object;
-    Point2D position;
-    struct Chained_Object* next;
-};
-typedef struct Chained_Object Chained_Object;
-Chained_Object* makeChainedObject(struct Object* object, Chained_Object *next, Point2D position);
-void freeAllChaineObject(Chained_Object **object);
-
 typedef struct Map {
   float width, height;
   Bounds4P bounds;
@@ -36,14 +28,19 @@ typedef struct Map {
   struct Chained_Object* items;
   struct Chained_Object* lastitem;
   int nbcurrentItem;
+  QuadTree tree;
   Object physicalBounds;
   int audioID;
   Color3f color;
+  float Bcolorevolution;
+  float Gcolorevolution;
   float frottement;
+  float state;
   int nbItems;
   Item* potentialItem;
-  float time;
+  Item specialItem;
   float itemState;
+  float time;
 } Map;
 
 void initMap(Map *map, float width, float height, float frottement, int textureID, int audioID, float time);
