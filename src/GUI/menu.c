@@ -156,7 +156,7 @@ void drawButton(Button* b){
         MENUS
 
 ***********************************/
-void initMenu(Menu* m, const char* titlefilename, int nbButtons, const char *imagefilename){
+void initMenu(Menu* m, const char* titlefilename, int nbButtons, const char *imagefilename, int withmap){
     int width,height;
     if(titlefilename!=NULL){
         glGenTextures(1,&m->titleTextureID);
@@ -172,48 +172,49 @@ void initMenu(Menu* m, const char* titlefilename, int nbButtons, const char *ima
         m->imageTextureID=0;
     m->buttons = malloc(sizeof(Button)*nbButtons);
     m->nbButtons=nbButtons;
-
-    char strfile[10] = "map/0";
-    int error;
-    readFile(&m->map,strfile,&error);
-    if(error!=NONEERROR){
-        fprintf(stderr,"Error while reading map %d, exit...\n",0);
-        switch(error){
-        case BADFORMATOBJECT:
-            fprintf(stderr," format obstacle errone");
-            break;
-        case BADFORMATITEM:
-            fprintf(stderr," format item errone");
-            break;
-        case BADFORMATSHAPE:
-            fprintf(stderr," format forme errone");
-            break;
-        case BADFORMATMAP:
-            fprintf(stderr," format map errone");
-            break;
-        case BADFORMATEFFECT:
-            fprintf(stderr," format effet errone");
-            break;
-        case FILENOTEXIST:
-            fprintf(stderr," fichier non existant");
-        case EOFREACHED:
-            fprintf(stderr," fin de fichier atteint");
-            break;
+    if(withmap){
+        char strfile[10] = "map/0";
+        int error;
+        readFile(&m->map,strfile,&error);
+        if(error!=NONEERROR){
+            fprintf(stderr,"Error while reading map %d, exit...\n",0);
+            switch(error){
+            case BADFORMATOBJECT:
+                fprintf(stderr," format obstacle errone");
+                break;
+            case BADFORMATITEM:
+                fprintf(stderr," format item errone");
+                break;
+            case BADFORMATSHAPE:
+                fprintf(stderr," format forme errone");
+                break;
+            case BADFORMATMAP:
+                fprintf(stderr," format map errone");
+                break;
+            case BADFORMATEFFECT:
+                fprintf(stderr," format effet errone");
+                break;
+            case FILENOTEXIST:
+                fprintf(stderr," fichier non existant");
+            case EOFREACHED:
+                fprintf(stderr," fin de fichier atteint");
+                break;
+            }
+            fprintf(stderr,", exit...\n");
+            exit(1);
         }
-        fprintf(stderr,", exit...\n");
-        exit(1);
+        int i;
+        m->nbBots = 3;
+        m->bots = malloc(sizeof(BotHovercraft)*m->nbBots);
+        for(i=0;i<m->nbBots;i++){
+            initBotHovercraft(m->bots+i,&m->map,0.002,makePoint(0,0),window.width,window.height);
+            m->bots[i].h.physical_body.x += i*20;
+            m->bots[i].h.physical_body.y += i*20;
+            m->bots[i].h.physical_body.angle = i*0.5*180./3.14;
+        }
+        m->indice=0;
+        playAudioFadeIn(m->map.audioID,1);
     }
-    int i;
-    m->nbBots = 3;
-    m->bots = malloc(sizeof(BotHovercraft)*m->nbBots);
-    for(i=0;i<m->nbBots;i++){
-        initBotHovercraft(m->bots+i,&m->map,0.002,makePoint(0,0),window.width,window.height);
-        m->bots[i].h.physical_body.x += i*20;
-        m->bots[i].h.physical_body.y += i*20;
-        m->bots[i].h.physical_body.angle = i*0.5*180./3.14;
-    }
-    m->indice=0;
-    playAudioFadeIn(m->map.audioID,1);
 }
 
 void drawMenu(const Menu* m, int viewportX){
@@ -363,7 +364,7 @@ void handleEventMenu(Menu *m, const SDL_Event *event){
 
 
 void initMainMenu(Menu* m){
-    initMenu(m,"images/titre.png",MAINMENUNBBUTTONS,NULL);
+    initMenu(m,"images/titre.png",MAINMENUNBBUTTONS,NULL,1);
     m->buttons[ONEPLAYERS]= makeButton("1 Joueur",makeBounds6F(-40.0,0.0,80.0,13.0),BTNFORE,BTNPBACK,un_joueur);
     m->buttons[TWOPLAYERS]= makeButton("Multijoueurs",makeBounds6F(-40.0,-14.0,80.0,13.0),BTNFORE,BTNPBACK,deux_joueurs);
     m->buttons[INSTRUCTIONS]= makeButton("Instructions",makeBounds6F(-40.0,-28.0,80.0,13.0),BTNFORE,BTNPBACK,instructions);
@@ -373,14 +374,14 @@ void initMainMenu(Menu* m){
 
 
 void initOnePlayer(Menu *menuOP){
-    initMenu(menuOP,"images/niveau.png",LEVELNBBUTTONS,NULL);
+    initMenu(menuOP,"images/niveau.png",LEVELNBBUTTONS,NULL,0);
     menuOP->buttons[LEVEL1]= makeButton("Niveau 1",makeBounds6F(-40.0,0.0,80.0,13.0),BTNFORE,BTNPBACK,niveau1);
     menuOP->buttons[LEVEL2]= makeButton("Niveau 2",makeBounds6F(-40.0,-14.0,80.0,13.0),BTNFORE,BTNPBACK,niveau2);
     menuOP->buttons[RETOUR]= makeButton("Retour",makeBounds6F(-40.0,-42.0,80.0,13.0),BTNFORE,BTNPBACK,goback);
 }
 
 void initMultiPlayers(Menu *menuMP){
-    initMenu(menuMP,"images/niveau.png",MULTINBBUTTONS,NULL);
+    initMenu(menuMP,"images/niveau.png",MULTINBBUTTONS,NULL,0);
     menuMP->buttons[JOUEURSNB2_1]= makeButton("2 Joueurs - Niveau 1",makeBounds6F(-65.0,0.0,60.0,13.0),BTNFORE,BTNPBACK,deux_joueurs_1);
     menuMP->buttons[JOUEURSNB2_2]= makeButton("2 Joueurs - Niveau 2",makeBounds6F(7.0,0.0,60.0,13.0),BTNFORE,BTNPBACK,deux_joueurs_2);
     menuMP->buttons[JOUEURSNB3_1]= makeButton("3 Joueurs - Niveau 1",makeBounds6F(-65.0,-14.0,60.0,13.0),BTNFORE,BTNPBACK,trois_joueurs_1);
@@ -391,11 +392,11 @@ void initMultiPlayers(Menu *menuMP){
 }
 
 void initInstruction(Menu *menuI){
-    initMenu(menuI,NULL,1,"images/instructions.png");
+    initMenu(menuI,NULL,1,"images/instructions.png",0);
     menuI->buttons[0]= makeButton("Retour",makeBounds6F(-40.0,-window.orthoGLY*0.95,80.0,window.orthoGLY*0.15),BTNFORE,BTNPBACK,goback);
 }
 
 void initCredits(Menu* menuC){
-    initMenu(menuC,NULL,1,"images/credits.png");
+    initMenu(menuC,NULL,1,"images/credits.png",0);
     menuC->buttons[0]= makeButton("Retour",makeBounds6F(-40.0,-window.orthoGLY*0.95,80.0,window.orthoGLY*0.15),BTNFORE,BTNPBACK,goback);
 }

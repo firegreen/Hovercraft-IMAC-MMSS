@@ -922,22 +922,24 @@ void updateObject(Object *object){
 }
 
 void freeObject(Object **o){
-    free((*o)->effectDelays);
-    if((*o)->effectsTypesAtCollision!=NULL){
-        (*o)->effectDelays = NULL;
-        free((*o)->effectsAtCollision);
-        (*o)->effectsAtCollision = NULL;
-        free((*o)->effectsTypesAtCollision);
-        (*o)->effectsTypesAtCollision = NULL;
-    }
-    /*Modification* modi = (*o)->receivedModifs;
-    if(modi!=NULL){
-        while(modi->next!=NULL){
-            free(modi);
-            modi = modi->next;
+    if(*o!=NULL){
+        if((*o)->effectsTypesAtCollision!=NULL && (*o)->effectDelays != NULL){
+            free((*o)->effectDelays);
+            (*o)->effectDelays = NULL;
+            free((*o)->effectsAtCollision);
+            (*o)->effectsAtCollision = NULL;
+            free((*o)->effectsTypesAtCollision);
+            (*o)->effectsTypesAtCollision = NULL;
+            free(*o);
         }
-        free((*o)->receivedModifs);
-    }*/
-    free(*o);
-    *o = NULL;
+        /*Modification* modi = (*o)->receivedModifs;
+        if(modi!=NULL){
+            while(modi->next!=NULL){
+                free(modi);
+                modi = modi->next;
+            }
+            free((*o)->receivedModifs);
+        }*/
+        *o = NULL;
+    }
 }

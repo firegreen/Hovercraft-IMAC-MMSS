@@ -115,7 +115,8 @@ void updateMap(Map *map){
             }
             else{
                 coNext = co->next->next;
-                freeObject(&co->next->object);
+                //freeObject(&co->next->object);
+                co->next->object->nbEffect=0;
                 free(co->next);
                 co->next = coNext;
             }
@@ -131,7 +132,8 @@ void updateMap(Map *map){
         }
         else{
             coNext = map->objects->next;
-            freeObject(&map->objects->object);
+            //freeObject(&map->objects->object);
+            map->objects->object->nbEffect=0;
             free(map->objects);
             map->objects = coNext;
         }
@@ -139,8 +141,9 @@ void updateMap(Map *map){
     if(map->items!=NULL){
         Chained_Object* item = map->items;
         while(item->next!=NULL){
-            if(item->next->object->effectDelays==NULL){
+            if(item->next->object->nbEffect==0){
                 Chained_Object* tmp = item->next->next;
+                freeObject(&item->next->object);
                 free(item->next);
                 item->next = tmp;
             }
@@ -156,8 +159,9 @@ void updateMap(Map *map){
                 item = item->next;
             }
         }
-        if(map->items->object->effectDelays==NULL){
+        if(map->items->object->nbEffect==0){
             Chained_Object* tmp = map->items->next;
+            freeObject(map->items->object);
             free(map->items);
             map->items = tmp;
         }
@@ -692,5 +696,6 @@ void readFile(Map* map, char* path, int* error)
         }
         setItem(map,item,i);
     }
+    fclose(fp);
 }
 

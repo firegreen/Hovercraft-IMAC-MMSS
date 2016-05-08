@@ -122,4 +122,4 @@ nbformes:1 nbeffets:1 vie:1 rayoncolision:10 statique:0 force:0 incassable:0 fre
 formes
 type:r topleft:(-5,5) size:(8,8) couleur:(1,1,1,1) rempli:1 texture:36
 effets
-type:p valeur:40
+type:p valeur:60

@@ -47,7 +47,7 @@ typedef struct Menu{
 } Menu;
 
 
-void initMenu(Menu* menu, const char* titlefilename, int nbButtons, const char* imagefilename);
+void initMenu(Menu* menu, const char* titlefilename, int nbButtons, const char* imagefilename, int withmap);
 void initMainMenu(Menu* menu);
 void initCredits(Menu* menuC);
 void initInstruction(Menu* menuI);

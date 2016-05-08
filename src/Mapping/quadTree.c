@@ -78,9 +78,10 @@ void freeAllChaineObject(Chained_Object **object){
             free(next);
             next = nnext;
         }
+        //freeObject(&(*object)->object);
+        //free(object);
+        *object=NULL;
     }
-    free(*object);
-    *object=NULL;
 }
 
 void addObjectToNode(Node* node, struct Object* object, Point2D position){

@@ -104,8 +104,8 @@ int cmpEvent(const SDL_Event* e1, const SDL_Event* e2){
     switch(e1->type){
     case SDL_KEYDOWN:
     case SDL_KEYUP:
-        return e1->key.keysym.sym == e2->key.keysym.sym &&
-                e1->key.keysym.mod == e2->key.keysym.mod;
+        return e1->key.keysym.sym == e2->key.keysym.sym
+                /*&& e1->key.keysym.mod == e2->key.keysym.mod*/;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
         return e1->button.button == e2->button.button;
@@ -154,6 +154,7 @@ int handleEventHovercraft(Hovercraft *hovercraft, const SDL_Event* e){
                 updateViewOfHovercraft(hovercraft);
                 break;
             case FORWARD:
+                printf("yolo");
                 hovercraft->linearAccelerate = 1;
                 break;
             case BACKWARD:
