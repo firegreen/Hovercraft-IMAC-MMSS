@@ -59,7 +59,7 @@ void loadCustomViewport(int x, int y, int width, int height){
 void initialize_window(float width, float height, unsigned char fullscreen)
 {
     /* Initialize the SDL library (starts the event loop) */
-    if ( SDL_Init(SDL_INIT_VIDEO  | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0 )
+    if ( SDL_Init(SDL_INIT_VIDEO  | SDL_INIT_AUDIO) < 0 )
     {
         fprintf(stderr,"Couldn't initialize SDL: %s\n", SDL_GetError());
         exit(1);
@@ -75,8 +75,10 @@ void initialize_window(float width, float height, unsigned char fullscreen)
         fprintf(stderr, "Couldn't set %fx%fx%d video mode: %s\n",width,height,BITS_PER_PIXEL,SDL_GetError());
         exit(1);
     }
-    SDL_WM_SetCaption("Over the sea","icon.png");
+    SDL_WM_SetCaption("Over the sea",NULL);
     SDL_JoystickEventState(SDL_ENABLE);
+    SDL_EnableUNICODE(1);
+    SDL_EnableKeyRepeat(10, 10);
     glDisable(GL_DEPTH_TEST);
     resize_handler(width,height);
     char fakeParam[] = "fake";

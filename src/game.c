@@ -5,6 +5,7 @@
 #include "audios.h"
 #include "Object2D/hovercraft.h"
 #include "GUI/menu.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef __APPLE__
@@ -199,14 +200,14 @@ void update()
 int handleEvent(const SDL_Event* event)
 {
     if(event->type == SDL_QUIT) return 0;
-    if(event->type == SDL_KEYUP)
+    /*if(event->type == SDL_KEYUP)
     {
         if(event->key.keysym.sym == SDLK_F4)
             if(event->key.keysym.mod == KMOD_LALT || event->key.keysym.mod == KMOD_RALT)
             {
                 return 0;
             }
-    }
+    }*/
     windowEventHandler(event);
     if(Game.transitionMode) return 1;
     switch (Game.currentMode)
@@ -250,7 +251,7 @@ void initializeGame()
     {
         initJoystick(Game.joysticks+i,i);
     }
-    SDL_PauseAudio(0);
+    //SDL_PauseAudio(0);
     initMainMenu(&(Game.currentModeStruct->menu));
     //initLevel(&Game.currentModeStruct->level,2,1,3);
     Game.specialMode = 1;
@@ -267,6 +268,8 @@ void game()
         unsigned int startTime = SDL_GetTicks();
         while(SDL_PollEvent(&event) && loop)
         {
+            if(event.type==SDL_KEYDOWN)
+                printf("%d %d\n",event.key.keysym.sym, event.key.state);
             loop = handleEvent(&event);
         }
         update();

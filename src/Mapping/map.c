@@ -161,7 +161,7 @@ void updateMap(Map *map){
         }
         if(map->items->object->nbEffect==0){
             Chained_Object* tmp = map->items->next;
-            freeObject(map->items->object);
+            freeObject(&map->items->object);
             free(map->items);
             map->items = tmp;
         }

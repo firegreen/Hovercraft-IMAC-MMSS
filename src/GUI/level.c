@@ -432,8 +432,8 @@ void initLevel(Level *level, int mapid, int nbplayers, int nbBots){
     }
     float angle=0;
     for(i=0;i<nbplayers;i++){
-        level->players[i].physical_body.x += 5*cosf(angle);
-        level->players[i].physical_body.y += 5*sinf(angle);
+        level->players[i].physical_body.x += 8*cosf(angle);
+        level->players[i].physical_body.y += 8*sinf(angle);
         level->players[i].physical_body.angle = angle*180./M_PI;
         angle+=M_PI/2.;
         updateViewOfHovercraft(level->players+i);
@@ -444,8 +444,8 @@ void initLevel(Level *level, int mapid, int nbplayers, int nbBots){
     angle=nbplayers*M_PI/2.;
     for(i=0;i<nbBots;i++){
         initBotHovercraft(level->bots+i,&level->map,0.002,makePoint(0,0),window.width,window.height);
-        level->bots[i].h.physical_body.x += 5*cos(angle);
-        level->bots[i].h.physical_body.y += 5*sin(angle);
+        level->bots[i].h.physical_body.x += 8*cos(angle);
+        level->bots[i].h.physical_body.y += 8*sin(angle);
         level->bots[i].h.physical_body.angle = angle*180./M_PI;
         angle+=M_PI/2.;
     }
@@ -747,8 +747,7 @@ void handleEventLevel(Level *l, const SDL_Event *event){
     if(event->type==SDL_VIDEORESIZE)
         handleEventLevelResize(l);
     for(i=0;i<l->nbPlayers;i++){
-        if(handleEventHovercraft(l->players+i,event))
-            return;
+        handleEventHovercraft(l->players+i,event);
     }
 }
 

@@ -1,6 +1,6 @@
 CC = gcc
-CCFLAGS = -Wall -g -O2
-#-std=c11
+CCFLAGS = -Wall -g
+#-std=c11  -O2
 LDFLAGS  = -lm
 APP_BIN = hovercraft
 SRC_PATH = src
@@ -32,12 +32,10 @@ else
         CCFLAGS += -I/Library/Frameworks/SDL.framework/Headers -I/Library/Frameworks/SDL_image.framework/Headers
         LDFLAGS += `sdl-config --libs` `sdl-config --cflags`
         CCFLAGS += -framework Cocoa -framework OpenGL -lSDL_image -lglut
-        CCFLAGS += -D OSX
         OBJ_PATH =obj/OSX
         BIN_PATH =bin/OSX
     else
         LDFLAGS += -lGL -lGLU -lglut -lSDL -lSDL_image
-        CCFLAGS += -D LINUX
         OBJ_PATH =obj/UNIX
         BIN_PATH =bin/UNIX
     endif
