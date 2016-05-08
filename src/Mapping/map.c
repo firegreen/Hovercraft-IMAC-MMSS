@@ -37,8 +37,10 @@ void drawMap(const Map* map){
 }
 void drawMiniMap(const Map* map){
     glPushMatrix();
-    glColor4f(0.1,0.2,0.4,0.5);
+    Color4f c = map->physicalBounds.shapes->color;
+    map->physicalBounds.shapes->color= makeColor4f(0.01,0.1,0.3,0.5);
     drawObject(&map->physicalBounds);
+    map->physicalBounds.shapes->color= c;
     glColor3f(1,1,1);
     Chained_Object* current = map->objects->next;
     while(current!=NULL){
@@ -50,7 +52,7 @@ void drawMiniMap(const Map* map){
 }
 
 void addItem(Map* map, int i){
-    if(map->nbcurrentItem<60)
+    if(map->nbcurrentItem<100)
     {
         Object* newO = malloc(sizeof(Object));
         cpyObject(newO,&map->potentialItem[i].object);
@@ -216,7 +218,7 @@ void initMap(Map* map, float width, float height, float frottement, int textureI
     map->audioID = audioID;
     map->lastitem = NULL;
     map->nbcurrentItem = 0;
-    playAudioFadeIn(audioID,0.1);
+    playAudioFadeIn(audioID,0.6);
 }
 
 void initMapItems(Map* map, int nbItems){

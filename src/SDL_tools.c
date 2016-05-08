@@ -59,7 +59,7 @@ void loadCustomViewport(int x, int y, int width, int height){
 void initialize_window(float width, float height, unsigned char fullscreen)
 {
     /* Initialize the SDL library (starts the event loop) */
-    if ( SDL_Init(SDL_INIT_VIDEO  | SDL_INIT_AUDIO) < 0 )
+    if ( SDL_Init(SDL_INIT_VIDEO  | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0 )
     {
         fprintf(stderr,"Couldn't initialize SDL: %s\n", SDL_GetError());
         exit(1);

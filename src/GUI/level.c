@@ -498,7 +498,7 @@ void drawLevel(const Level* level){
     glLoadIdentity();
     glColor3ub(255,255,255);
     glBegin(GL_QUADS);
-    glColor3f(0.3,0.5,0.3);
+    glColor3f(0.3,0.7,0.3);
     glVertex3f(10,0,1);
     glVertex3f(0,10,1);
     glVertex3f(0,glY-10,1);
@@ -506,7 +506,7 @@ void drawLevel(const Level* level){
     glColor3f(0.1,0.0,0.1);
     glEnd();
     glBegin(GL_QUADS);
-    glColor3f(0.3,0.5,0.3);
+    glColor3f(0.3,0.7,0.3);
     glVertex3f(glX-10,0,1);
     glVertex3f(glX,10,1);
     glVertex3f(glX,glY-10,1);
@@ -514,7 +514,7 @@ void drawLevel(const Level* level){
     glColor3f(0.1,0.0,0.1);
     glEnd();
     glBegin(GL_QUADS);
-    glColor3f(0.3,0.5,0.3);
+    glColor3f(0.3,0.7,0.3);
     glVertex3f(0,20,0);
     glVertex3f(20,0,1);
     glVertex3f(glX-20,0,1);
@@ -522,7 +522,7 @@ void drawLevel(const Level* level){
     glColor3f(0.1,0.0,0.1);
     glEnd();
     glBegin(GL_QUADS);
-    glColor3f(0.3,0.5,0.3);
+    glColor3f(0.3,0.7,0.3);
     glVertex3f(0,glY-20,0);
     glVertex3f(20,glY,1);
     glVertex3f(glX-20,glY,1);
@@ -538,7 +538,7 @@ void drawLevel(const Level* level){
         glViewport(window.width*0.8,0,window.width*0.2,window.width*0.2*(level->map.height/level->map.width));
         break;
     case 2:
-        glViewport(window.width*0.5-window.width*0.1,window.height - 300*(level->map.height/level->map.width),
+        glViewport(window.width*0.5-window.width*0.1,window.height - 450*(level->map.height/level->map.width),
                    window.width*0.2,window.width*0.2*(level->map.height/level->map.width));
         break;
     default:
@@ -603,7 +603,7 @@ void updateLevel(Level* level){
         level->specialObject->effectDelays[i]=1;
         level->specialObject->effectsTypesAtCollision[i] = FESTIVAL;
         level->specialObject->effectsAtCollision[i].festival.level = level;
-        level->specialObject->shapes->color = makeColor4f(0.8,0.9,0.3,1);
+        level->specialObject->shapes->color = makeColor4f(0.5,0.9,0.3,1);
         char ok = 0;
         Chained_Object* co;
         Intersection inter;

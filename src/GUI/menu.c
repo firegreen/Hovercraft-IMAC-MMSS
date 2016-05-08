@@ -232,8 +232,8 @@ void drawMenu(const Menu* m, int viewportX){
     }
     bImage = makeBounds2P(-0.8*window.orthoGLX,0.7*window.orthoGLY,
                           0.8*window.orthoGLX,-0.7*window.orthoGLY);
-    bTitle = makeBounds2P(-0.7*window.orthoGLX,0.7*window.orthoGLY,
-                          0.7*window.orthoGLX,0.2*window.orthoGLY);
+    bTitle = makeBounds2P(-0.7*window.orthoGLX,0.8*window.orthoGLY,
+                          0.7*window.orthoGLX,0.3*window.orthoGLY);
     if(m->titleTextureID)
         drawTextureQuad(m->titleTextureID,&WHITE,&bTitle);
     if(m->imageTextureID)
@@ -245,8 +245,8 @@ void drawTwoMenu(const Menu *m, const Menu *m2, int viewportX1, int viewportX2){
     Bounds2P bTitle, bImage;
     bImage = makeBounds2P(-0.8*window.orthoGLX,0.7*window.orthoGLY,
                           0.8*window.orthoGLX,-0.7*window.orthoGLY);
-    bTitle = makeBounds2P(-0.7*window.orthoGLX,0.7*window.orthoGLY,
-                          0.7*window.orthoGLX,0.2*window.orthoGLY);
+    bTitle = makeBounds2P(-0.7*window.orthoGLX,0.8*window.orthoGLY,
+                          0.7*window.orthoGLX,0.3*window.orthoGLY);
     updateViewOfHovercraft(&m->bots[1].h);
     applyCameraTransform(&m->bots[1].h.view);
     drawMap(&m->map);
@@ -286,8 +286,8 @@ void specialdrawMenu(const Menu *m, float state, int viewportX){
     else{
         drawMap(&m->map);
         loadCustomViewport(-window.width*(100.-state)/10.,0,window.width,window.height);
-        Bounds2P bTitle = makeBounds2P(-0.7*window.orthoGLX,0.7*window.orthoGLY,
-                              0.7*window.orthoGLX,0.2*window.orthoGLY);
+        Bounds2P     bTitle = makeBounds2P(-0.7*window.orthoGLX,0.8*window.orthoGLY,
+                                           0.7*window.orthoGLX,0.3*window.orthoGLY);
         if(m->titleTextureID)
             drawTextureQuad(m->titleTextureID,&WHITE,&bTitle);
         return;

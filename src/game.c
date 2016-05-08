@@ -251,7 +251,7 @@ void initializeGame()
     {
         initJoystick(Game.joysticks+i,i);
     }
-    //SDL_PauseAudio(0);
+    SDL_PauseAudio(0);
     initMainMenu(&(Game.currentModeStruct->menu));
     //initLevel(&Game.currentModeStruct->level,2,1,3);
     Game.specialMode = 1;
