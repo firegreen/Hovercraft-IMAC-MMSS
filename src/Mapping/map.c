@@ -21,11 +21,6 @@ char imagefile[100];
 
 void drawMap(const Map* map){
     glPushMatrix();
-    int i = 0;
-    for(i=0;i<4;i++){
-        map->physicalBounds.shapes->texturesPoints[i].x += 0.0005;
-        map->physicalBounds.shapes->texturesPoints[i].y += 0.0005;
-    }
     drawObject(&map->physicalBounds);
     Chained_Object* current = map->objects->next;
     while(current!=NULL){
@@ -50,36 +45,14 @@ void drawMiniMap(const Map* map){
 }
 
 void addItem(Map* map, int i){
-    if(map->nbcurrentItem<60)
+    if(map->nbcurrentItem<30)
     {
         Object* newO = malloc(sizeof(Object));
         cpyObject(newO,&map->potentialItem[i].object);
-        char ok = 0;
-        Chained_Object* co;
-        Intersection inter;
-
-        int cpt=0;
-        while(!ok){
-            co = map->objects;
-            ok = 1;
-            newO->x = (float)(rand()%(int)(map->bounds.rightBottom.x-map->bounds.leftBottom.x))
-                    + map->bounds.leftBottom.x;
-            newO->y = (float)(rand()%(int)(map->bounds.leftTop.y-map->bounds.rightBottom.y))
-                    + map->bounds.leftBottom.y;
-            newO->vx =5*((float)(rand()%2)-1);
-            newO->vy =5*((float)(rand()%2)-1);
-            while(co!=NULL){
-                ok = !(collisionBetweenObject(newO,co->object,&inter));
-                if(!ok) break;
-                co = co->next;
-            }
-            cpt++;
-            if(cpt>2){
-                freeObject(&newO);
-                return;
-            }
-        }
-        newO->vx = newO->vy = 0;
+        newO->x = (float)(rand()%(int)(map->bounds.rightBottom.x-map->bounds.leftBottom.x))
+                + map->bounds.leftBottom.x;
+        newO->y = (float)(rand()%(int)(map->bounds.leftTop.y-map->bounds.rightBottom.y))
+                + map->bounds.leftBottom.y;
         newO->vAngle = 1;
         addObjectToMap(map,newO,makePoint(newO->x,newO->y));
         map->items = makeChainedObject(newO,map->items,makePoint(newO->x,newO->y));
@@ -88,16 +61,6 @@ void addItem(Map* map, int i){
 }
 
 void updateMap(Map *map){
-    if(map->color.b<=0.8 || map->color.b>1.0){
-        map->Bcolorevolution*=-1;
-    }
-    if(map->color.g<=0.9 || map->color.g>1.0){
-        map->Gcolorevolution*=-1;
-    }
-    map->color.g += map->color.g*map->Gcolorevolution;
-    map->color.b += map->color.b*map->Bcolorevolution;
-    map->state +=0.001;
-    if(map->state>1) map->state = 0;
     Chained_Object* co, *co2;
     Chained_Object* coNext;
     if(map->objects!=NULL){
@@ -188,8 +151,6 @@ void initMap(Map* map, float width, float height, float frottement, int textureI
     map->objects = NULL;
     map->frottement = frottement;
     map->color = makeColor3f(1,1,1);
-    map->Bcolorevolution = -0.003;
-    map->Gcolorevolution = -0.0002;
     makeObject(&(map->physicalBounds),1,1,100,2000,1,0,1);
     float ratioX = 2*window.width/(window.orthoGLX*2);
     float ratioY = 2*window.height/(window.orthoGLY*2);
@@ -206,12 +167,11 @@ void initMap(Map* map, float width, float height, float frottement, int textureI
     map->objects=NULL;
     map->items = NULL;
     addObjectToMap(map,&(map->physicalBounds),makePoint(0,0));
-    map->state=0;
-    map->itemState = 0;
     map->time = time;
     map->audioID = audioID;
     map->lastitem = NULL;
     map->nbcurrentItem = 0;
+    map->itemState = 0;
     playAudioFadeIn(audioID,0.1);
 }
 
@@ -692,5 +652,31 @@ void readFile(Map* map, char* path, int* error)
         }
         setItem(map,item,i);
     }
+}
+
+Chained_Object* makeChainedObject(struct Object* object, Chained_Object *next, Point2D position){
+    Chained_Object* co;
+    co = malloc(sizeof(Chained_Object));
+    if(co!=NULL){
+        co->next = next;
+        co->object = object;
+        co->position = position;
+    }
+    return co;
+}
+
+void freeAllChaineObject(Chained_Object **object){
+    if(*object!=NULL){
+        Chained_Object* next,*nnext;
+        next  = (*object)->next;
+        while(next!=NULL){
+            nnext = next->next;
+            freeObject(&next->object);
+            free(next);
+            next = nnext;
+        }
+    }
+    free(*object);
+    *object=NULL;
 }
 

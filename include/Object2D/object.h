@@ -14,7 +14,7 @@
 
 
 typedef enum EFFECT_TYPE {MAX_SPEED, ACCELERATION,
-                          REBOUND, SPEED, POINTSMODIF, FESTIVAL} EFFECT_TYPE;
+                          REBOUND, SPEED, POINTSMODIF} EFFECT_TYPE;
 typedef enum SHAPE_TYPE {POLYGON, SEGMENT, CIRCLE} SHAPE_TYPE;
 
 struct Level;
@@ -24,8 +24,6 @@ typedef union Effect {
   struct { float resistance; float rebound_value;} rebound;
   struct { float force_value;} force;
   struct { float max_speed_value; } maxSpeed;
-  struct { struct Level* level; } festival;
-  /* and other...*/
 } Effect;
 
 typedef struct Shape{
@@ -33,7 +31,6 @@ typedef struct Shape{
       struct { Point2D* points; int full; unsigned int nbPoints;} polygon;
       struct { Point2D p1,p2;} segment;
       struct { Point2D center; float radius; int full;} circle;
-      /* and other...*/
     } spec;
     Color4f color;
     SHAPE_TYPE type;
@@ -117,11 +114,6 @@ int collisionBetweenObject(const Object* o1, const Object* o2, Intersection* int
 int collisionBetweenShapes(const Shape* shape1, Point2D p1, float angle1, Vector2D direction1,
                            const Shape* shape2, Point2D p2, float angle2,
                            Intersection* intersect);
-
-typedef struct EffectStatus {
-    unsigned char destroyEffect;
-    unsigned char destroyObject;
-}EffectStatus;
 
 struct Hovercraft;
 
