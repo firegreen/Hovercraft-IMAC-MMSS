@@ -13,6 +13,7 @@ ifeq ($(OS),Windows_NT)
     CCFLAGS += -D WIN32
     OBJ_PATH =obj/WIN32
     BIN_PATH =bin/WIN32
+    RUN = "./bin/WIN32/hovercraft"
     LDFLAGS += -lSDL -lmingw32 -lSDLmain  -lSDL_image -lopengl32 -lglu32 -lfreeglut
     IF_N_EXIST = if not exist
     W_OBJ_FILES = $(subst /,\,$(OBJ_FILES))
@@ -27,6 +28,7 @@ else
     IF_N_EXIST = if [ ! -d
     THEN = ]; then
     ENDIF =; fi
+    RUN = ./bin/UNIX/hovercraft
     ifeq ($(shell uname),Darwin)
         CCFLAGS += -I/opt/local/include
         CCFLAGS += -I/Library/Frameworks/SDL.framework/Headers -I/Library/Frameworks/SDL_image.framework/Headers
@@ -68,3 +70,6 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c $(INC_PATH)/%.h
 	$(CC) -c $< -o $@ -I $(INC_PATH) $(CCFLAGS)
 clean:
 	$(CLEAN_CMD)
+
+run:
+	$(RUN)
