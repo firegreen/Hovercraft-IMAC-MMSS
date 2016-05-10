@@ -301,7 +301,7 @@ int specialUpdateMenu(const Menu *m, float *state){
     else{
         *state +=0.09;
     }
-    return *state<100;
+    return ((*state)<100);
 }
 
 void updateMenu(Menu *m){

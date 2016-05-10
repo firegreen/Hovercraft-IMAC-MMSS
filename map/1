@@ -108,7 +108,7 @@ type:r topleft:(-10,10) size:(20,20)couleur:(0.9,1,1,1) rempli:1 texture:32 adap
 effets
 type:r resistance:40 rebond:1.2
 items
-nbformes:1 nbeffets:1 vie:1 rayoncolision:10 statique:0 force:0 incassable:0 freq:0.003
+nbformes:1 nbeffets:1 vie:1 rayoncolision:10 statique:0 force:0 incassable:0 freq:0.002
 formes
 type:r topleft:(-5,5) size:(8,8) couleur:(1,1,1,1) rempli:1 texture:31
 effets
@@ -118,7 +118,7 @@ formes
 type:r topleft:(-5,5) size:(8,8) couleur:(1,1,1,1) rempli:1 texture:35
 effets
 type:p valeur:40
-nbformes:1 nbeffets:1 vie:1 rayoncolision:10 statique:0 force:0 incassable:0 freq:0.0001
+nbformes:1 nbeffets:1 vie:1 rayoncolision:10 statique:0 force:0 incassable:0 freq:0.0005
 formes
 type:r topleft:(-5,5) size:(8,8) couleur:(1,1,1,1) rempli:1 texture:36
 effets

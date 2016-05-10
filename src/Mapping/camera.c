@@ -63,12 +63,6 @@ void updateViewOfHovercraft(Hovercraft* h){
 }
 
 void applyCameraTransform(const Camera *c){
-    /*glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(-window.orthoGLX, window.orthoGLX,-window.orthoGLY,window.orthoGLY);
-    glViewport(c->viewportleftTop.x,c->viewportleftTop.y,c->viewportWidth,c->viewportHeight);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();*/
     loadCustomViewport(c->viewportleftTop.x,c->viewportleftTop.y,c->viewportWidth,c->viewportHeight);
 
     float scaleX = (window.orthoGLX*2)/(c->rightBottom.x - c->leftTop.x);

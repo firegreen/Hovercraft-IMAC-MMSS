@@ -20,10 +20,6 @@ void resize_handler(float width, float height)
     window.height = height;
     window.orthoGLX = GLREPERE;
     window.orthoGLY = GLREPERE * height/width;
-    reloadGLrepere();
-}
-
-void reloadGLrepere(){
 #ifndef WIN32
     if (SDL_SetVideoMode(window.width, window.height, BITS_PER_PIXEL, window.option) == NULL )
     {
@@ -31,27 +27,24 @@ void reloadGLrepere(){
         exit(1);
     }
 #endif
+    reloadGLrepere();
+}
+
+void reloadGLrepere(){
+    glViewport(0,0,window.width,window.height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-window.orthoGLX, window.orthoGLX, -window.orthoGLY, window.orthoGLY);
-    glViewport(0,0,window.width,window.height);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
 
 
 void loadCustomViewport(int x, int y, int width, int height){
-#ifndef WIN32
-    if (SDL_SetVideoMode(window.width, window.height, BITS_PER_PIXEL, window.option) == NULL )
-    {
-        fprintf(stderr, "Couldn't set %fx%fx%d video mode: %s\n",window.width, window.height,BITS_PER_PIXEL,SDL_GetError());
-        exit(1);
-    }
-#endif
+    glViewport(x,y,width,height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluOrtho2D(-window.orthoGLX, window.orthoGLX, -window.orthoGLY, window.orthoGLY);
-    glViewport(x,y,width,height);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
