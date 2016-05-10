@@ -480,8 +480,8 @@ void drawLevel(const Level* level){
                    200,200*(level->map.height/level->map.width));
         break;
     default:
-        glViewport(window.width/2-100,window.height/2 - 50*(level->map.height/level->map.width),
-                   200,200*(level->map.height/level->map.width));
+        glViewport(window.width/2-100,window.height/2 + 50*(level->map.height/level->map.width),
+                   200,window.height*0.3*(level->map.height/level->map.width));
         break;
     }
 
@@ -542,7 +542,7 @@ void drawLevel(const Level* level){
                    window.width*0.2,window.width*0.2*(level->map.height/level->map.width));
         break;
     default:
-        glViewport(window.width*0.5-window.width*0.1,window.height/2 - 230*(level->map.height/level->map.width),
+        glViewport(window.width*0.5-window.width*0.1,window.height/2 - 300*(level->map.height/level->map.width),
                    window.width*0.2,window.width*0.2*(level->map.height/level->map.width));
         break;
     }

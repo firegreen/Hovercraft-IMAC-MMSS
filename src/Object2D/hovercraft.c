@@ -249,8 +249,6 @@ Vector2D newDirection(BotHovercraft *hovercraft, Chained_Object* objects){
     for(i=0;i<3;i++){
         direction1 = makeVector(direction1.x*cosLeft - direction1.y*sinLeft,
                                 direction1.x*sinLeft + direction1.y*cosLeft);
-        direction2 = makeVector(direction2.x*cosLeft + direction2.y*sinLeft,
-                                direction2.x*sinLeft - direction2.y*cosLeft);
         l.start = makePoint(h_object.x,h_object.y);
         l.end = makePoint(h_object.x+direction1.x*h_object.colliderRadius,
                           h_object.y+direction1.y*h_object.colliderRadius);
@@ -266,6 +264,10 @@ Vector2D newDirection(BotHovercraft *hovercraft, Chained_Object* objects){
             co = co->next;
         }
         if(co==NULL) return direction1;
+    }
+	for(i=0;i<3;i++){
+        direction2 = makeVector(direction2.x*cosLeft + direction2.y*sinLeft,
+                                direction2.x*sinLeft - direction2.y*cosLeft);
         
         l.start = makePoint(h_object.x,h_object.y);
         l.end = makePoint(h_object.x+direction2.x*h_object.colliderRadius,
